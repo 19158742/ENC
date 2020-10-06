@@ -173,6 +173,11 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="LogicFolder\DataOperations.cs" />
+    <Compile Include="LogicFolder\DBOperations.cs" />
+    <Compile Include="LogicFolder\ReadFile.cs" />
+    <Compile Include="LogicFolder\ReceiverInfo.cs" />
+    <Compile Include="LogicFolder\ValidateData.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
@@ -238,6 +243,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="UploadedFiles\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
