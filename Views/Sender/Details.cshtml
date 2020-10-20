@@ -1,0 +1,57 @@
+﻿@model ENC.tbl_senderinfo
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.sender_fname)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.sender_fname)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.sender_lname)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.sender_lname)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.sender_email)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.sender_email)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.secret_word)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.secret_word)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.sender_attribute)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.sender_attribute)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.sender_id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

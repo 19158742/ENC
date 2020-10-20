@@ -1,0 +1,50 @@
+﻿@model ENC.tbl_SR_allocation
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>tbl_SR_allocation</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.sender_id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.sender_id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.receiver_id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.receiver_id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.tbldatakey_id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.tbldatakey_id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.receiver_key)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.receiver_key)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.sr_id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

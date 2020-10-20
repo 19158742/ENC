@@ -38,7 +38,7 @@ namespace ENC.Controllers
                         string senderAttribute = d.generateSenderAttribute(senderFirstName, senderLastName, senderEmail, senderSecretWord);
                         if (senderAttribute != null)
                         {
-                            senderId = db.saveSenderInformation(senderFirstName, senderLastName, senderEmail, senderSecretWord, senderAttribute);
+                            //senderId = db.saveSenderInformation(senderFirstName, senderLastName, senderEmail, senderSecretWord, senderAttribute);
                         }
                         else
                         {

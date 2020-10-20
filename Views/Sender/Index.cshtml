@@ -1,0 +1,58 @@
+﻿@model IEnumerable<ENC.tbl_senderinfo>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.sender_fname)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.sender_lname)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.sender_email)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.secret_word)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.sender_attribute)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.sender_fname)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.sender_lname)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.sender_email)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.secret_word)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.sender_attribute)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id = item.sender_id }) |
+            @Html.ActionLink("Details", "Details", new { id = item.sender_id }) |
+            @Html.ActionLink("Delete", "Delete", new { id = item.sender_id }) |
+            @Html.ActionLink("UploadFile", "UploadFile", new { id = item.sender_id })
+        </td>
+    </tr>
+}
+
+</table>

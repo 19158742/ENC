@@ -3,7 +3,13 @@ using System.EnterpriseServices.Internal;
 using System.IO;
 using System.Text;
 using System.Web;
+using System.Security.Cryptography;
 using WebGrease;
+using System.Linq;
+using System.Numerics;
+using System.Web.WebPages;
+using System.Data.Entity;
+using System.Web.UI.WebControls;
 
 namespace ENC
 {
@@ -11,108 +17,190 @@ namespace ENC
     {
         ReceiverInfo ri = new ReceiverInfo();
         DataOperations d = new DataOperations();
+        DBOperations db = new DBOperations();
         internal string ProcessThisFile(int senderId,HttpPostedFileBase file)
         {
-
-            int m = generateM(senderId,file);
+            //upload data screen
+            string m = generateM(senderId,file);
             string datakey = generateDataKey(m);
-            SaveDataKeyOnServer(datakey);
-            EncryptData(datakey);
+            //SaveDataKeyOnServer(senderId,datakey);
+            if (datakey != "")
+            {
+                EncryptData(datakey, file, senderId);
+            }
+
             ///// Process after entering receivers data on 2nd screen
-            int tempn = generateN(ri);
-            int n = validateTempN(tempn, m);
-            string receiverKey = generateReceiverKey(n);
-            SaveReceiverKeyOnServer(receiverKey,senderId);
+            //int tempn = generateN(ri);
+            //int n = validateTempN(tempn, m);
+            //string receiverKey = generateReceiverKey(n);
+            //SaveReceiverKeyOnServer(receiverKey,senderId);
 
             ///
             //string line = "";
-            return ReadDataFile(file);
+            //return ReadDataFile(file);
+            return "s";
         }
 
-        private void SaveReceiverKeyOnServer(string receiverKey, int senderId)
+        
+
+        public string generateReceiverKey(int n)
         {
-            throw new NotImplementedException();
+            string nkey = Convert.ToString(n);
+            if (nkey.IsEmpty())
+            {
+                return "";
+
+            }
+            return nkey;
         }
 
-        private string generateReceiverKey(int n)
+        private void EncryptData(string datakey, HttpPostedFileBase file, int senderId)
         {
-            throw new NotImplementedException();
+            ReadDataFile(datakey, file,senderId);
         }
 
-        private void EncryptData(string datakey)
+        private void SaveDataKeyOnServer(int senderId, string datakey)
         {
-            throw new NotImplementedException();
+            db.SaveDataKeyOnServer(senderId, datakey);
         }
 
-        private void SaveDataKeyOnServer(string datakey)
+        private string generateDataKey(string m)
         {
-            throw new NotImplementedException();
+            if(m.IsEmpty())
+            {
+                return ""; 
+                
+            }
+            return m;
         }
 
-        private string generateDataKey(int m)
+        public int validateTempN(int tempn, int datakeyid)
         {
-            throw new NotImplementedException();
+            int mlength = db.getMLength(datakeyid);
+            int tempnlength = Convert.ToString(tempn).Length;
+            if(tempnlength > mlength)
+            {
+                tempn = tempn - mlength;
+            }
+            return tempn;
+            // if length of tempn>m = n= n-m = updatevalue of tempn 
+            //else return tempn            
         }
 
-        private int validateTempN(int tempn, int m)
-        {
-            // if tempn>m = n= n-m = updatevalue of tempn and again check if tempn>m
-            //else return tempn
-            throw new NotImplementedException();
-        }
-
-        private int generateN(ReceiverInfo ri)
+        public int generateN(ReceiverInfo ri)
         {
 
-            int cnt = countReceiverInfoCharacters(ri);
-            //Mod operation of cnt and timestamp then  generate number n
-            throw new NotImplementedException();
+            int cntCharacters = countReceiverInfoCharacters(ri);
+            long multi = cntCharacters * Convert.ToInt64(DateTime.Now.Ticks);
+            string str = Convert.ToString(multi).Substring(0, 5);
+            int n = Convert.ToInt32(str);
+            return n;
+            //Multiply operation of cnt and timestamp and take first 5 digits, then  generate number n
         }
 
         private int countReceiverInfoCharacters(ReceiverInfo ri)
         {
-            throw new NotImplementedException();
+            return ri.receiverEmail.Length + ri.receiverName.Length + ri.senderid.Length + ri.datakeyid.Length;
         }
 
-        private int generateM(int senderId, HttpPostedFileBase file)
+        private string generateM(int senderId, HttpPostedFileBase file)
         {
-            //Generate integer m based on sender's attribute , filesize, timestamp
-            throw new NotImplementedException();
+            int contentSize = file.ContentLength;
+            long finaltempdata = Convert.ToInt64(DateTime.Now.Ticks) * contentSize * senderId;
+            string getSpecificChar = Convert.ToString(finaltempdata);
+            if (getSpecificChar.Contains('-'))
+            {
+                getSpecificChar = Convert.ToString(finaltempdata).Split('-')[1];
+            }
+            if (getSpecificChar.Length < 32)
+            {
+                while (getSpecificChar.Length != 32)
+                {
+                    getSpecificChar = getSpecificChar + "1";
+                }
+            }
+            if (getSpecificChar.Length > 32) {
+                while (getSpecificChar.Length != 32)
+                    getSpecificChar = getSpecificChar.Remove(getSpecificChar.Length - 1, 1);
+            }
+            
+            return getSpecificChar;
+            //Generate integer m based on sender's attribute , filesize, currentday
         }
 
-        private string ReadDataFile(HttpPostedFileBase file)
-        {
-            string stringToSearch = "abc";
-            StringBuilder sbText = new StringBuilder();
+        private string ReadDataFile(string datakey, HttpPostedFileBase file, int senderId)
+        {           
             BinaryReader b = new BinaryReader(file.InputStream);
             byte[] binData = b.ReadBytes(file.ContentLength);
 
-            string result = System.Text.Encoding.UTF8.GetString(binData);
-            result.Replace("\r\n", " ");
-            string[] lines = result.Split(' ');
-            foreach (string line in lines)
+            string resultRawData = System.Text.Encoding.UTF8.GetString(binData);
+            byte[] stringBytes = Encoding.ASCII.GetBytes(datakey);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(stringBytes);
+            byte[] resultDataKey = stringBytes;
+            using (AesManaged aes = new AesManaged())
             {
-                if (line != null)
-                {
-                    if (line.Contains(stringToSearch))
-                    {
-                        line.Replace(stringToSearch, "newstring");
-                        sbText.AppendLine(line);
-                    }
-                    else
-                    {
-                        sbText.AppendLine(line);
-                    }
-                }
+                byte[] encrypted = Encrypt(resultRawData, resultDataKey, aes.IV);
+                return WriteTofile(encrypted, file,senderId,datakey);
             }
-            return WriteTofile(sbText);
+            //System.Text.Encoding.UTF8.GetString(encrypted) --output
+
+
+
+            //result.Replace("\r\n", " ");
+            //string[] lines = result.Split(' ');
+            //foreach (string line in lines)
+            //{
+            //    if (line != null)
+            //    {
+            //        //if (line.Contains(stringToSearch))
+            //        //{
+            //        //    line.Replace(stringToSearch, "newstring");
+            //        //    sbText.AppendLine(line);
+            //        //}
+            //        //else
+            //        //{
+            //        //    sbText.AppendLine(line);
+            //        //}
+            //    }
+            //}
+            
         }
 
-        private string WriteTofile(StringBuilder sbText)
+        static byte[] Encrypt(string plainText, byte[] Key, byte[] IV)
+        {
+            byte[] encrypted;  
+            using (AesManaged aes = new AesManaged())
+            {  
+                ICryptoTransform encryptor = aes.CreateEncryptor(Key, IV);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter sw = new StreamWriter(cs))
+                            sw.Write(plainText);
+                        encrypted = ms.ToArray();
+                    }
+                }
+            } 
+            return encrypted;
+        }
+        private string WriteTofile(byte[] encrypted, HttpPostedFileBase file, int senderId, string datakey)
         {
             try
             {
-                return "success";
+                if (file.ContentLength > 0)
+                {
+                    var fileName = Path.GetFileName(file.FileName);
+                    tbl_datakey objtbl_datakey = new tbl_datakey();
+                    objtbl_datakey.sender_id = senderId;
+                    objtbl_datakey.datafilename = Convert.ToString(fileName);
+                    objtbl_datakey.datafile = encrypted;
+                    objtbl_datakey.datakey = datakey;
+                    db.saveFileDataToDB(objtbl_datakey);
+                    return "success";
+                }
+                return "failure";
             }
             catch(Exception ex)
             {
@@ -122,6 +210,35 @@ namespace ENC
             //string _FileName = Path.GetFileName(file.FileName);
             //string _path = Path.Combine(Server.MapPath("~/UploadedFiles"), _FileName);
             //file.SaveAs(_path);
+        }
+
+
+
+        public string getDecryptedData(byte[] encrypted,string datakey)
+        {
+            string decrypted = string.Empty;
+            using (AesManaged aes = new AesManaged())
+            {
+                 decrypted = Decrypt(encrypted, aes.Key, aes.IV);
+            }
+            return decrypted;
+        }
+        static string Decrypt(byte[] cipherText, byte[] Key, byte[] IV)
+        {
+            string plaintext = null;
+            using (AesManaged aes = new AesManaged())
+            {
+                ICryptoTransform decryptor = aes.CreateDecryptor(Key, IV);
+                using (MemoryStream ms = new MemoryStream(cipherText))
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                    {
+                        using (StreamReader reader = new StreamReader(cs))
+                            plaintext = reader.ReadToEnd();
+                    }
+                }
+            }
+            return plaintext;
         }
     }
 }
