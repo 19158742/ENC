@@ -48,7 +48,7 @@ namespace ENC
             string nkey = Convert.ToString(n);
             if (nkey.IsEmpty())
             {
-                return "";
+                return ""; //use sender's attribute
 
             }
             return nkey;
@@ -128,7 +128,7 @@ namespace ENC
             //Generate integer m based on sender's attribute , filesize, currentday
         }
 
-        private string ReadDataFile(string datakey, HttpPostedFileBase file, int senderId)
+        private string ReadDataFile(string datakey, HttpPostedFileBase file, int senderId)//Encryption
         {           
             BinaryReader b = new BinaryReader(file.InputStream);
             byte[] binData = b.ReadBytes(file.ContentLength);
@@ -212,14 +212,19 @@ namespace ENC
             //file.SaveAs(_path);
         }
 
+        //-----//
 
-
+        
         public string getDecryptedData(byte[] encrypted,string datakey)
         {
             string decrypted = string.Empty;
+            byte[] stringBytes = Encoding.ASCII.GetBytes(datakey);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(stringBytes);
+            byte[] resultDataKey = stringBytes;
             using (AesManaged aes = new AesManaged())
             {
-                 decrypted = Decrypt(encrypted, aes.Key, aes.IV);
+                 decrypted = Decrypt(encrypted, resultDataKey, aes.IV);
             }
             return decrypted;
         }

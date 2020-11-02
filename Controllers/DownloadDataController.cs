@@ -2,24 +2,65 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Principal;
 using System.Web;
 using System.Web.Mvc;
 using ENC;
+using ENC.Models;
 
 namespace ENC.Controllers
 {
     public class DownloadDataController : Controller
     {
         private DBModel db = new DBModel();
-
+        DataOperations d = new DataOperations();
+        List<DownloadDataModel> datalists = new List<DownloadDataModel>();
         // GET: DownloadData
         public ActionResult Index()
         {
-            return View(db.tbl_SR_allocation.ToList());
+            //int receiver_id = db.tbl_receiverinfo.Where(x => x.receiver_email.Equals(User.Identity));
+            int receiver_id = 1;
+           
+            var datakeyids = db.tbl_SR_allocation.Where(x => x.receiver_id == receiver_id).Select(x=>new { datakeyid = x.tbldatakey_id, srid= x.sr_id }).ToList();
+            foreach(var key in datakeyids)
+            {
+                string datafilename = db.tbl_datakey.Where(x => x.tbldatakey_id == key.datakeyid).Select(x => x.datafilename).FirstOrDefault();
+                DownloadDataModel ddl = new DownloadDataModel();
+                ddl.datafilename = datafilename;
+                ddl.datakey_id = key.datakeyid;
+                ddl.sr_id = key.srid;
+                datalists.Add(ddl);
+            }
+            return View(datalists);
         }
 
+        [HttpPost]
+        public ActionResult Index(int? srid)
+        {
+            int sr_id = 3;
+            int datakeyid = 19;
+            string receiver_key = "-5998";
+            string sender_fname = "shraddha";
+            string sender_lname = "mhatre";
+            string sender_email = "shraddha@gmail.com";
+            string msg = d.getData(sr_id, datakeyid, receiver_key, sender_fname, sender_lname, sender_email);
+            if (msg != null)
+            {
+                var path = @"D:\ABC\demo.txt";
+                using (StreamWriter sw = new StreamWriter(path))
+                {
+                    sw.Write(msg);
+                }
+                //System.IO.File.WriteAllText(@"D:\ABC\", msg);// Write Final Data To File
+                //string _FileName = Path.GetFileName(file.FileName);
+                //string _path = Path.Combine(Server.MapPath("~/UploadedFiles"), "demo");
+                //file.SaveAs(_path);
+            }
+            return View(datalists);
+        }
         // GET: DownloadData/Details/5
         public ActionResult Details(int? id)
         {
@@ -123,5 +164,7 @@ namespace ENC.Controllers
             }
             base.Dispose(disposing);
         }
+
+       
     }
 }

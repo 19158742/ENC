@@ -7,8 +7,7 @@ using System.Web.Mvc;
 namespace ENC
 {
     public class DataOperations
-    {
-        DBOperations db = new DBOperations();
+    { 
         internal string generateSenderAttribute(string senderFirstName, string senderLastName, string senderEmail, string senderSecretWord)
         {
             string attr = senderFirstName.Substring(0, 2) + senderLastName.Substring(1, 2) + senderEmail.Substring(2, 5) + senderSecretWord.Substring(0, 1);
@@ -17,6 +16,7 @@ namespace ENC
 
         public List<SelectListItem> getSenderList()
         {
+            DBOperations db = new DBOperations();
             List<tbl_senderinfo> result = db.getSenderList();
             return (List<SelectListItem>)result.ToList().Select(x => new SelectListItem()
             {
@@ -41,6 +41,23 @@ namespace ENC
             string receiverKey = rf.generateReceiverKey(n);
             tbl_SR_allocation.receiver_key = receiverKey;
             dbo.SaveReceiverKeyOnServer(tbl_SR_allocation);
+        }
+        public string getData(int sr_id, int datakeyid, string receiver_key, string sender_fname, string sender_lname, string sender_email)
+        {
+            DBOperations db = new DBOperations();
+            ReadFile r = new ReadFile();
+            string resValidation = db.validateUserData(sr_id, datakeyid, receiver_key, sender_fname, sender_lname, sender_email);
+            if (resValidation.Equals("success"))
+            {
+                string datakey = db.getDataKey(datakeyid);
+                byte[] getencryptedmsg = db.getEncryptedMsg(datakeyid);
+                string mydata = r.getDecryptedData(getencryptedmsg, datakey);
+                return mydata;
+            }
+            else
+            {
+                return "failure";
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Web;
+using System.Web.UI.WebControls;
 
 namespace ENC
 {
@@ -55,6 +56,36 @@ namespace ENC
         {
           string dkey = db.tbl_datakey.Where(x => x.tbldatakey_id == datakeyid).Select(x => x.datakey).FirstOrDefault();
           return dkey.Length;
+        }
+
+        internal string validateUserData(int sr_id, int datakeyid, string receiver_key, string sender_fname, string sender_lname, string sender_email)
+        {
+            int sender_id = db.tbl_senderinfo.Where(x=>x.sender_fname == sender_fname && x.sender_lname == sender_lname && x.sender_email == sender_email).Select(x=>x.sender_id).FirstOrDefault();
+            if(sender_id != 0)
+            {
+                int tblsrid = db.tbl_SR_allocation.Where(x => x.sender_id == sender_id && x.receiver_key == receiver_key && x.tbldatakey_id == datakeyid).Select(x => x.sr_id).FirstOrDefault();
+                if(tblsrid != 0)
+                {
+                    return "success";
+                }
+                else
+                {
+                    return "failure";
+                }
+            }
+            return "failure";
+        }
+
+        internal byte[] getEncryptedMsg(int datakeyid)
+        {
+            byte[] datafile = db.tbl_datakey.Where(x => x.tbldatakey_id == datakeyid).Select(x => x.datafile).FirstOrDefault();
+            return datafile;
+        }
+
+        internal string getDataKey(int datakeyid)
+        {
+            string datakey = db.tbl_datakey.Where(x => x.tbldatakey_id == datakeyid).Select(x => x.datakey).FirstOrDefault();
+            return datakey;
         }
     }
 }

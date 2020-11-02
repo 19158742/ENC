@@ -1,52 +1,33 @@
-﻿@model IEnumerable<ENC.tbl_SR_allocation>
+﻿@model IEnumerable<ENC.Models.DownloadDataModel>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "MyData";
 }
 
-<h2>Index</h2>
+<br />
+<br />
+<br />
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        @*<th>
-            @Html.DisplayNameFor(model => model.sender_id)
-        </th>*@
-        <th>
-            @Html.DisplayNameFor(model => model.receiver_id)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.tbldatakey_id)
-        </th>
-        @*<th>
-            @Html.DisplayNameFor(model => model.receiver_key)
-        </th>*@
-        <th></th>
-    </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        @*<td>
-            @Html.DisplayFor(modelItem => item.sender_id)
-        </td>*@
-        <td>
-            @Html.DisplayFor(modelItem => item.receiver_id)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.tbldatakey_id)
-        </td>
-        @*<td>
-            @Html.DisplayFor(modelItem => item.receiver_key)
-        </td>*@
-    <td>
-        @Html.ActionLink("DownloadData", "Create", new { id=item.sr_id })
-        @*@Html.ActionLink("Edit", "Edit", new { id=item.sr_id }) |
-        @Html.ActionLink("Details", "Details", new { id=item.sr_id }) |
-        @Html.ActionLink("Delete", "Delete", new { id=item.sr_id })*@
-    </td>
-    </tr>
+@foreach (var item in Model)
+{
+    @Html.Label("File name - ") @Html.DisplayFor(modelItem => item.datafilename)
+    <br />
+    @Html.Label("Receiver's Key")
+    @Html.TextBox("ReceiverKey")
+    <br />
+    @Html.Label("Sender's First Name")
+    @Html.TextBox("SenderFirstName")
+    <br />
+    @Html.Label("Sender's Last Name")
+    @Html.TextBox("SenderLastName")
+    <br />
+    @Html.Label("Sender's Email")
+    @Html.TextBox("SenderEmail")
+    <br />
+    //@Html.ActionLink("Download", "Download", new { id = item })
+    using (Html.BeginForm("Index", "DownloadData", FormMethod.Post, new { id = item.sr_id }))
+    {
+        <input type="submit" value="Download" />
+    }
 }
-
-</table>

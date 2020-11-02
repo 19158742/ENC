@@ -7,8 +7,7 @@ namespace ENC
 
     public partial class DBModel : DbContext
     {
-        public DBModel()
-            : base("name=DBModel")
+        public DBModel() : base("name=DBModel")
         {
         }
 
