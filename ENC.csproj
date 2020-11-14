@@ -185,6 +185,7 @@
     <Compile Include="LogicFolder\DBOperations.cs" />
     <Compile Include="LogicFolder\ReadFile.cs" />
     <Compile Include="LogicFolder\ReceiverInfo.cs" />
+    <Compile Include="LogicFolder\SRInfo.cs" />
     <Compile Include="LogicFolder\ValidateData.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\DownloadDataModel.cs" />
@@ -274,6 +275,7 @@
     <Content Include="Views\DownloadData\Details.cshtml" />
     <Content Include="Views\DownloadData\Edit.cshtml" />
     <Content Include="Views\DownloadData\Index.cshtml" />
+    <Content Include="Views\SRAllocation\ss.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

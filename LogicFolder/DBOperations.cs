@@ -24,6 +24,38 @@ namespace ENC
             }
         }
 
+        internal List<SRInfo> getSRInfo()
+        {
+            var query = (from sr in db.tbl_SR_allocation
+                         join s in db.tbl_senderinfo on sr.sender_id equals s.sender_id
+                         join r in db.tbl_receiverinfo on sr.receiver_id equals r.receiver_id
+                         join d in db.tbl_datakey on sr.tbldatakey_id equals d.tbldatakey_id
+                         select new
+                         {
+                             srid = sr.sr_id,
+                             senderid = sr.sender_id,
+                             receiver_id = sr.receiver_id,
+                             datakey_id = sr.tbldatakey_id,
+                             senderemail = s.sender_email,
+                             receiveremail = r.receiver_email,
+                             datafilename = d.datafilename
+                         }).Distinct().ToList();
+            List<SRInfo> listSRInfo = new List<SRInfo>();
+            foreach (var q in query)
+            {
+                SRInfo srinfo = new SRInfo();
+                srinfo.srid = q.srid;
+                srinfo.senderid = Convert.ToInt32(q.senderid);
+                srinfo.receiver_id = Convert.ToInt32(q.receiver_id);
+                srinfo.datakey_id = q.datakey_id;
+                srinfo.senderemail = q.senderemail;
+                srinfo.receiveremail = q.receiveremail;
+                srinfo.datafilename = q.datafilename;
+                listSRInfo.Add(srinfo);
+            }
+            return listSRInfo;
+        }
+
         internal void SaveDataKeyOnServer(int senderId, string datakey)
         {
         //    DBModel db = new DBModel();
@@ -86,6 +118,40 @@ namespace ENC
         {
             string datakey = db.tbl_datakey.Where(x => x.tbldatakey_id == datakeyid).Select(x => x.datakey).FirstOrDefault();
             return datakey;
+        }
+
+        internal Dictionary<string, string> GetAllSenders()
+        {
+          var list =   db.tbl_senderinfo.Select(x => new { x.sender_id, x.sender_fname }).ToList();
+            var dictionary = new Dictionary<string, string>();
+            foreach (var l in list)
+            {
+                dictionary.Add(Convert.ToString(l.sender_id), l.sender_fname);
+            }
+            return dictionary;
+        }
+
+        internal Dictionary<string, string> GetAllReceivers()
+        {
+            var list = db.tbl_receiverinfo.Select(x => new { x.receiver_id, x.receiver_name }).ToList();
+            var dictionary = new Dictionary<string, string>();
+            foreach (var l in list)
+            {
+                dictionary.Add(Convert.ToString(l.receiver_id), l.receiver_name);
+            }
+            return dictionary;
+        }
+
+        internal Dictionary<string, string> GetAllDataFileIds(string senderid)
+        {
+            int sid = Convert.ToInt32(senderid);
+            var list = db.tbl_datakey.Where(x=>x.sender_id == sid).Select(x => new { x.tbldatakey_id, x.datafilename }).ToList();
+            var dictionary = new Dictionary<string, string>();
+            foreach (var l in list)
+            {
+                dictionary.Add(Convert.ToString(l.tbldatakey_id), l.datafilename);
+            }
+            return dictionary;
         }
     }
 }

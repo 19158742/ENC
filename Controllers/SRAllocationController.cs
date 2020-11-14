@@ -14,11 +14,12 @@ namespace ENC.Controllers
     {
         private DBModel db = new DBModel();
         DataOperations d = new DataOperations();
-
+        DBOperations dbOp = new DBOperations();
         // GET: SRAllocation
         public ActionResult Index()
-        {
-            return View(db.tbl_SR_allocation.ToList());
+        {            
+            List<SRInfo> srinfo = dbOp.getSRInfo();
+            return View(srinfo.ToList());
         }
 
         // GET: SRAllocation/Details/5
@@ -122,6 +123,30 @@ namespace ENC.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        [HttpGet]
+        public JsonResult FetchSenderIds() // its a GET, not a POST
+        {
+            var senders = new Dictionary<string, string>();
+            senders = dbOp.GetAllSenders();
+            return Json(senders, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult FetchReceiverIds()
+        {
+            var receivers = new Dictionary<string, string>();
+            receivers = dbOp.GetAllReceivers();
+            return Json(receivers, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult FetchDataFileIds(string sender_id)
+        {
+            var datafileids = new Dictionary<string, string>();
+            datafileids = dbOp.GetAllDataFileIds(sender_id);
+            return Json(datafileids, JsonRequestBehavior.AllowGet);
         }
     }
 }

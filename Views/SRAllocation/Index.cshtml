@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ENC.tbl_SR_allocation>
+﻿@model IEnumerable<ENC.SRInfo>
 
 @{
     ViewBag.Title = "Index";
@@ -12,16 +12,13 @@
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.sender_id)
+            @Html.Label("Sender")
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.receiver_id)
+            @Html.Label("Receiver")
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.tbldatakey_id)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.receiver_key)
+            @Html.Label("File Name")
         </th>
         <th></th>
     </tr>
@@ -29,22 +26,18 @@
 @foreach (var item in Model) {
     <tr>
         <td>
-            @Html.DisplayFor(modelItem => item.sender_id)
-           
+            @Html.DisplayFor(modelItem => item.senderemail)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.receiver_id)
+            @Html.DisplayFor(modelItem => item.receiveremail)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.tbldatakey_id)
+            @Html.DisplayFor(modelItem => item.datafilename)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.receiver_key)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.sr_id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.sr_id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.sr_id })
+            @Html.ActionLink("Edit", "Edit", new { id=item.srid }) |
+            @Html.ActionLink("Details", "Details", new { id=item.srid }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.srid })
         </td>
     </tr>
 }

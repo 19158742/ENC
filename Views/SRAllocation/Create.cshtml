@@ -5,19 +5,74 @@
 }
 
 <h2>Create</h2>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script type="text/javascript">
-    $.ready({
-        getSenderData();
+    $(document).ready(function () {
+        var myurl = '/SRAllocation/FetchSenderIds';
+        var senders = $('#sender_id');
+        $.ajax({
+            type: "GET",
+            url: myurl,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                senders.empty();
+                senders.append($('<option></option>').text("Select Option").val(0));
+                $.each(result, function (index, item) {
+                    senders.append($("<option></option>").text(item).val(index));
+                });
+            }
+        });
+
+
+        
+        var receivers = $('#receiver_id');
+        var getreclist = '/SRAllocation/FetchReceiverIds';
+       
+            $.ajax({
+                type: "GET",
+                url: getreclist,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    receivers.empty();
+                    receivers.append($('<option></option>').text("Select Option").val(0));
+                    $.each(result, function (index, item) {
+                        receivers.append($("<option></option>").text(item).val(index));
+                    });
+                }
+            });    
+
+        var datafiles = $('#tbldatakey_id');
+        var getdatafileslist = '/SRAllocation/FetchDataFileIds';
+        $('#sender_id').on("change", function () {
+            var senderid = $(this).val();
+            if (senderid != 0) {
+                $.ajax({
+                    type: "GET",
+                    url: getdatafileslist,
+                    data: {sender_id: senderid },
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (result) {
+                        datafiles.empty();
+                        datafiles.append($('<option></option>').text("Select Option").val(0));
+                        $.each(result, function (index, item) {
+                            datafiles.append($("<option></option>").text(item).val(index));
+                        });
+                    }
+                });   
+            }
+        });
     });
 
-    function getSenderData() {
-        alert(1);
-    }
+
+   
 </script>
-@using (Html.BeginForm()) 
+@using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
+
     <div class="form-horizontal">
         <h4>tbl_SR_allocation</h4>
         <hr />
@@ -26,32 +81,28 @@
         
         @Html.LabelFor(model => model.sender_id, htmlAttributes: new { @class = "control-label col-md-2" })
         <div class="col-md-10">
-            @Html.EditorFor(model => model.sender_id, new { htmlAttributes = new { @class = "form-control" } })
-            @*@Html.DropDownListFor(model => model.sender_id, new SelectList(Model.Senders, "Value", "Text"), "Please Select a sender")*@
-            @Html.ValidationMessageFor(model => model.sender_id, "", new { @class = "text-danger" })
+            <select id="sender_id" name="sender_id" class="form-control"></select>
         </div>
     </div>
 
         <div class="form-group">
             @Html.LabelFor(model => model.receiver_id, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.receiver_id, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.receiver_id, "", new { @class = "text-danger" })
+                <select id="receiver_id" name="receiver_id" class="form-control"></select>
             </div>
         </div>
 
         <div class="form-group">
             @Html.LabelFor(model => model.tbldatakey_id, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.tbldatakey_id, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.tbldatakey_id, "", new { @class = "text-danger" })
+                <select id="tbldatakey_id" name="tbldatakey_id" class="form-control"></select>
             </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="color:white;">
             @Html.LabelFor(model => model.receiver_key, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.receiver_key, new { htmlAttributes = new { @class = "form-control" } })
+            <div class="col-md-10" >
+                @Html.EditorFor(model => model.receiver_key, new { htmlAttributes = new { @class = "form-control", @style = "display:none;" } })
                 @Html.ValidationMessageFor(model => model.receiver_key, "", new { @class = "text-danger" })
             </div>
         </div>
