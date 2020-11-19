@@ -90,6 +90,11 @@ namespace ENC
           return dkey.Length;
         }
 
+        internal string getFileNameById(int datakeyid)
+        {
+            return db.tbl_datakey.Where(x => x.tbldatakey_id == datakeyid).Select(x => x.datafilename).FirstOrDefault();
+        }
+
         internal string validateUserData(int sr_id, int datakeyid, string receiver_key, string sender_fname, string sender_lname, string sender_email)
         {
             int sender_id = db.tbl_senderinfo.Where(x=>x.sender_fname == sender_fname && x.sender_lname == sender_lname && x.sender_email == sender_email).Select(x=>x.sender_id).FirstOrDefault();

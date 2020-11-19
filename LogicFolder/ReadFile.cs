@@ -10,6 +10,7 @@ using System.Numerics;
 using System.Web.WebPages;
 using System.Data.Entity;
 using System.Web.UI.WebControls;
+using System.Net.Http;
 
 namespace ENC
 {
@@ -26,7 +27,7 @@ namespace ENC
             //SaveDataKeyOnServer(senderId,datakey);
             if (datakey != "")
             {
-                EncryptData(datakey, file, senderId);
+                 EncryptData(datakey, file, senderId);
             }
 
             ///// Process after entering receivers data on 2nd screen
@@ -38,7 +39,7 @@ namespace ENC
             ///
             //string line = "";
             //return ReadDataFile(file);
-            return "s";
+            return null;
         }
 
         
@@ -54,9 +55,9 @@ namespace ENC
             return nkey;
         }
 
-        private void EncryptData(string datakey, HttpPostedFileBase file, int senderId)
+        private string EncryptData(string datakey, HttpPostedFileBase file, int senderId)
         {
-            ReadDataFile(datakey, file,senderId);
+            return ReadDataFile(datakey, file,senderId);
         }
 
         private void SaveDataKeyOnServer(int senderId, string datakey)
@@ -141,8 +142,9 @@ namespace ENC
             using (AesManaged aes = new AesManaged())
             {
                 byte[] encrypted = Encrypt(resultRawData, resultDataKey, aes.IV);
-                return WriteTofile(encrypted, file,senderId,datakey);
+                WriteTofile(encrypted, file,senderId,datakey);
             }
+            return null;
             //System.Text.Encoding.UTF8.GetString(encrypted) --output
 
 
@@ -198,13 +200,17 @@ namespace ENC
                     objtbl_datakey.datafile = encrypted;
                     objtbl_datakey.datakey = datakey;
                     db.saveFileDataToDB(objtbl_datakey);
+                    
+                    //d.GenerateDataFile(objtbl_datakey);
+                    d.UploadFileOnCloud(objtbl_datakey, file);
                     return "success";
                 }
                 return "failure";
+                return null;
             }
             catch(Exception ex)
             {
-                return "failure";
+                return null;
             }
             //System.IO.File.WriteAllText("D:\\UploadedFiles", sbText.ToString());// Write Final Data To File
             //string _FileName = Path.GetFileName(file.FileName);

@@ -51,11 +51,11 @@ namespace ENC.Controllers
                     }
                     if(senderId > 0)
                     {
-                        processFile = r.ProcessThisFile(senderId,file);
+                       /* processFile = r.ProcessThisFile(senderId,file);
                         if(processFile.Equals("success"))
                         {
                             //File Encrypted and Uploaded Successfully
-                        }
+                        }*/
                     }
                     else
                     {

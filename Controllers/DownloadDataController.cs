@@ -5,11 +5,17 @@ using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Security.Principal;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using ENC;
 using ENC.Models;
+
+
+
+
 
 namespace ENC.Controllers
 {
@@ -38,10 +44,10 @@ namespace ENC.Controllers
         }
 
         [HttpPost]
-        public ActionResult Index(int? srid)
+        public HttpResponseMessage Index(int? srid)
         {
             int sr_id = 3;
-            int datakeyid = 19;
+            int datakeyid = 1028;
             string receiver_key = "-5998";
             string sender_fname = "shraddha";
             string sender_lname = "mhatre";
@@ -49,18 +55,41 @@ namespace ENC.Controllers
             string msg = d.getData(sr_id, datakeyid, receiver_key, sender_fname, sender_lname, sender_email);
             if (msg != null)
             {
+                byte[] msgtobytes = Encoding.ASCII.GetBytes(msg);
+                HttpContext context = System.Web.HttpContext.Current;
+                context.Response.BinaryWrite(msgtobytes);
+                context.Response.ContentType = "text/plain";
+                context.Response.AppendHeader("Content-Length", msgtobytes.Length.ToString());
+                context.Response.OutputStream.Write(msgtobytes, 0, (int)msgtobytes.Length);
+                context.Response.End();
+
+                string fileName = Guid.NewGuid() + ".txt";
+                Stream stream = new MemoryStream(msgtobytes);
+                HttpResponseMessage httpResponseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+                httpResponseMessage.Content = new StreamContent(stream);
+                httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+                httpResponseMessage.Content.Headers.ContentDisposition.FileName = fileName;
+                httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
+                if (httpResponseMessage.Content == null)
+                {
+                    httpResponseMessage.Content = new StringContent("");
+                }
+                return httpResponseMessage;
+                /* //Write to file on specific destination folder
                 var path = @"D:\ABC\demo.txt";
-                using (StreamWriter sw = new StreamWriter(path))
+                using (StreamWriter sw = new StreamWriter(path)) 
                 {
                     sw.Write(msg);
-                }
+                }*/
                 //System.IO.File.WriteAllText(@"D:\ABC\", msg);// Write Final Data To File
                 //string _FileName = Path.GetFileName(file.FileName);
                 //string _path = Path.Combine(Server.MapPath("~/UploadedFiles"), "demo");
                 //file.SaveAs(_path);
             }
-            return View(datalists);
+            return null;
+            //return View(datalists);
         }
+
         // GET: DownloadData/Details/5
         public ActionResult Details(int? id)
         {

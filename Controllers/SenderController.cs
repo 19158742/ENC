@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using ENC;
+using System.Net.Http;
 
 namespace ENC.Controllers
 {
@@ -97,6 +98,7 @@ namespace ENC.Controllers
         public ActionResult UploadFile(int id, HttpPostedFileBase file)
         {
             r.ProcessThisFile(id,file);
+            
             return RedirectToAction("Index");
         }
 
