@@ -97,8 +97,9 @@ namespace ENC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult UploadFile(int id, HttpPostedFileBase file)
         {
+            Console.WriteLine(DateTime.Now.TimeOfDay);
             r.ProcessThisFile(id,file);
-            
+            Console.WriteLine(DateTime.Now.TimeOfDay);
             return RedirectToAction("Index");
         }
 

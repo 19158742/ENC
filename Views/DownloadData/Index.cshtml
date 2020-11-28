@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ENC.Models.DownloadDataModel>
+﻿@model ListDownloadDataModel
 
 @{
     ViewBag.Title = "MyData";
@@ -9,25 +9,53 @@
 <br />
 
 
-@foreach (var item in Model)
+@using (Html.BeginForm("DownloadDataModel", "DownloadData", FormMethod.Post))
 {
-    @Html.Label("File name - ") @Html.DisplayFor(modelItem => item.datafilename)
-    <br />
-    @Html.Label("Receiver's Key")
-    @Html.TextBox("ReceiverKey")
-    <br />
-    @Html.Label("Sender's First Name")
-    @Html.TextBox("SenderFirstName")
-    <br />
-    @Html.Label("Sender's Last Name")
-    @Html.TextBox("SenderLastName")
-    <br />
-    @Html.Label("Sender's Email")
-    @Html.TextBox("SenderEmail")
-    <br />
-    //@Html.ActionLink("Download", "Download", new { id = item })
-    using (Html.BeginForm("Index", "DownloadData", FormMethod.Post, new { id = item.sr_id }))
+    
+
+    for (int i = 0; i < Model.listdownloadDataModel.Count; i++)
     {
-        <input type="submit" value="Download" />
+        @Html.Label("File name - ") @Html.DisplayFor(modelItem => modelItem.listdownloadDataModel[i].datafilename)
+        <br />
+        @Html.Label("Receiver's Key")
+        @Html.TextBoxFor(modelItem => modelItem.listdownloadDataModel[i].rkey)
+        <br />
+        @Html.Label("Sender's First Name")
+        @Html.EditorFor(modelItem => modelItem.listdownloadDataModel[i].sfname)
+        <br />
+        @Html.Label("Sender's Last Name")
+        @Html.EditorFor(modelItem => modelItem.listdownloadDataModel[i].slname)
+        <br />
+        @Html.Label("Sender's Email")
+        @Html.EditorFor(modelItem => modelItem.listdownloadDataModel[i].semail)
+        <br />
+        if(Model.listdownloadDataModel[i].rkey == null) { Model.listdownloadDataModel[i].rkey = "null"; }
+        if (Model.listdownloadDataModel[i].sfname == null) { Model.listdownloadDataModel[i].sfname = "null"; }
+        if (Model.listdownloadDataModel[i].slname == null) { Model.listdownloadDataModel[i].slname = "null"; }
+        if (Model.listdownloadDataModel[i].semail == null) { Model.listdownloadDataModel[i].semail = "null"; }
+        <input type="button" value="DownloadDataModel" onclick="getFile(@Model.listdownloadDataModel[i].datakey_id,@Model.listdownloadDataModel[i].sr_id,@Model.listdownloadDataModel[i].rkey,@Model.listdownloadDataModel[i].sfname,@Model.listdownloadDataModel[i].slname,@Model.listdownloadDataModel[i].semail);" />
     }
+    <div id="txtResponse"></div>
 }
+
+<script type="text/javascript">
+    function getFile(datakeyid, sr_id,rkey,sfname,slname,semail) {
+        var url = "/DownloadData/Index";
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            dataType: "json",
+            traditional: true,
+            contentType: "application/json",
+            data: JSON.stringify({ 'datakey_id': datakeyid, 'srid': sr_id,'r_key': rkey,'s_name': sfname,'s_lname': slname,'s_email': semail }),            
+            success: function (data) {
+                document.getElementById('txtResponse').innerHTML = JSON.stringify(data.Data);
+            },
+            error: function (xhr, status, error) {
+                var errorText = xhr.status + "\r\n" + status + "\r\n" + error;
+                document.getElementById('txtResponse').innerHTML = errorText;
+            }
+        });
+    }
+</script>
