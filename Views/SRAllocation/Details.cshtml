@@ -7,11 +7,10 @@
 <h2>Details</h2>
 
 <div>
-    <h4>tbl_SR_allocation</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.sender_id)
+            @Html.DisplayName("Sender")
         </dt>
 
         <dd>
@@ -19,7 +18,7 @@
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.receiver_id)
+            @Html.DisplayName("Receiver")
         </dt>
 
         <dd>
@@ -27,7 +26,7 @@
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.tbldatakey_id)
+            @Html.DisplayName("File")
         </dt>
 
         <dd>
@@ -35,12 +34,13 @@
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.receiver_key)
+            @Html.DisplayName("Receiver's key")
         </dt>
 
         <dd>
             @Html.DisplayFor(model => model.receiver_key)
         </dd>
+
 
     </dl>
 </div>

@@ -17,6 +17,8 @@ namespace ENC
 {
     public class DataOperations
     {
+        BlobManager b = new BlobManager("azurecontainer");
+        CycladeManager c = new CycladeManager();
         internal string generateSenderAttribute(string senderFirstName, string senderLastName, string senderEmail, string senderSecretWord)
         {
             string attr = senderFirstName.Substring(0, 2) + senderLastName.Substring(1, 2) + senderEmail.Substring(2, 5) + senderSecretWord.Substring(0, 1);
@@ -59,12 +61,27 @@ namespace ENC
             if (resValidation.Equals("success"))
             {
                 string datakey = db.getDataKey(datakeyid);
-                byte[] getencryptedmsg = db.getEncryptedMsg(datakeyid); //getting encrypted data from sql
-                string mydata = r.getDecryptedData(getencryptedmsg, datakey);
 
-                byte[] getencryptedmsgfromcloud = downloadDataFromCloud(datakeyid);
-                string myclouddata = r.getDecryptedData(getencryptedmsg, datakey);
-                return mydata;
+
+                /* //local sql
+                 * byte[] getencryptedmsg = db.getEncryptedMsg(datakeyid); //getting encrypted data from local sql
+                 * string mydata = r.getDecryptedData(getencryptedmsg, datakey); 
+                 */
+                //cyclade
+
+                byte[] getencryptedmsgfromcyclade = c.downloadCycladeData(datakeyid);
+                string myclouddata = r.getDecryptedData(getencryptedmsgfromcyclade, datakey);
+                /* //aws
+                 * byte[] getencryptedmsgfromaws = downloadDataFromCloud(datakeyid);
+                 * string myclouddata = r.getDecryptedData(getencryptedmsgfromaws, datakey);
+                 */
+
+                /* // azure
+                 * byte[] getencryptedmsgfromazure = b.downloadAzuereData(datakeyid); 
+                 * string myclouddata = r.getDecryptedData(getencryptedmsgfromazure, datakey);
+                 */
+                //return mydata;
+                return myclouddata;
             }
             else
             {
@@ -119,7 +136,9 @@ namespace ENC
                         StorageClass = S3StorageClass.StandardInfrequentAccess,
                         PartSize = 6291456, // 6 MB.  
                         Key = keyName,
-                        CannedACL = S3CannedACL.PublicRead
+                        CannedACL = S3CannedACL.PublicRead,
+                        ContentType = "text/plain;charset=utf-8"
+                        
                     };
                     fileTransferUtility.Upload(fileTransferUtilityRequest);
                     fileTransferUtility.Dispose();
@@ -143,7 +162,7 @@ namespace ENC
 
     }
 
-        private byte[] ReadToEnd(Stream stream)
+        public byte[] ReadToEnd(Stream stream)
         {
             long originalPosition = 0;
 
@@ -195,28 +214,6 @@ namespace ENC
 
         }
 
-        //internal HttpResponseMessage GenerateDataFile(tbl_datakey objtbl_datakey)
-        //{
-
-        //    byte[] content = objtbl_datakey.datafile;
-        //    HttpContext context = HttpContext.Current;
-        //    context.Response.BinaryWrite(content);
-        //    context.Response.ContentType = "text/plain";
-        //    context.Response.AppendHeader("Content-Length", content.Length.ToString());
-        //    context.Response.OutputStream.Write(content, 0, (int)content.Length);
-        //    context.Response.End();
-
-        //    string fileName = Guid.NewGuid() + ".txt";
-        //    Stream stream = new MemoryStream(content);
-        //    HttpResponseMessage httpResponseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-        //    httpResponseMessage.Content = new StreamContent(stream);
-        //    httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
-        //    httpResponseMessage.Content.Headers.ContentDisposition.FileName = fileName;
-        //    httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
-        //    return httpResponseMessage;
-
-        //}
-
-
+       
     }
 }

@@ -10,6 +10,8 @@ using System.Security.Principal;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Script.Serialization;
+using System.Web.Services;
 using ENC;
 using ENC.Models;
 
@@ -23,7 +25,7 @@ namespace ENC.Controllers
     {
         private DBModel db = new DBModel();
         DataOperations d = new DataOperations();
-        List<DownloadDataModel> datalists = new List<DownloadDataModel>();
+       
         // GET: DownloadData
         public ActionResult Index()
         {
@@ -31,28 +33,29 @@ namespace ENC.Controllers
             int receiver_id = 1;
            
             var datakeyids = db.tbl_SR_allocation.Where(x => x.receiver_id == receiver_id).Select(x=>new { datakeyid = x.tbldatakey_id, srid= x.sr_id }).ToList();
-            foreach(var key in datakeyids)
+            List<DownloadDataModel> datalists = new List<DownloadDataModel>();
+            ListDownloadDataModel listddl = new ListDownloadDataModel();
+            foreach (var key in datakeyids)
             {
-                string datafilename = db.tbl_datakey.Where(x => x.tbldatakey_id == key.datakeyid).Select(x => x.datafilename).FirstOrDefault();
                 DownloadDataModel ddl = new DownloadDataModel();
+                string datafilename = db.tbl_datakey.Where(x => x.tbldatakey_id == key.datakeyid).Select(x => x.datafilename).FirstOrDefault();
                 ddl.datafilename = datafilename;
                 ddl.datakey_id = key.datakeyid;
                 ddl.sr_id = key.srid;
                 datalists.Add(ddl);
             }
-            return View(datalists);
+            listddl.listdownloadDataModel = datalists;
+            return View(listddl);
         }
 
         [HttpPost]
-        public HttpResponseMessage Index(int? srid)
+        public JsonResult Index(string datakey_id,string srid, string r_key , string s_name, string s_lname,string s_email)
         {
-            int sr_id = 3;
-            int datakeyid = 1028;
-            string receiver_key = "-5998";
+            string receiver_key = "67593";
             string sender_fname = "shraddha";
             string sender_lname = "mhatre";
             string sender_email = "shraddha@gmail.com";
-            string msg = d.getData(sr_id, datakeyid, receiver_key, sender_fname, sender_lname, sender_email);
+            string msg = d.getData(Convert.ToInt32(srid), Convert.ToInt32(datakey_id), receiver_key, sender_fname, sender_lname, sender_email);
             if (msg != null)
             {
                 byte[] msgtobytes = Encoding.ASCII.GetBytes(msg);
@@ -74,7 +77,7 @@ namespace ENC.Controllers
                 {
                     httpResponseMessage.Content = new StringContent("");
                 }
-                return httpResponseMessage;
+                //return httpResponseMessage;
                 /* //Write to file on specific destination folder
                 var path = @"D:\ABC\demo.txt";
                 using (StreamWriter sw = new StreamWriter(path)) 
@@ -86,7 +89,7 @@ namespace ENC.Controllers
                 //string _path = Path.Combine(Server.MapPath("~/UploadedFiles"), "demo");
                 //file.SaveAs(_path);
             }
-            return null;
+            return Json(true, JsonRequestBehavior.AllowGet);
             //return View(datalists);
         }
 

@@ -19,25 +19,16 @@ namespace ENC
         ReceiverInfo ri = new ReceiverInfo();
         DataOperations d = new DataOperations();
         DBOperations db = new DBOperations();
+        BlobManager b = new BlobManager("azurecontainer");
         internal string ProcessThisFile(int senderId,HttpPostedFileBase file)
         {
             //upload data screen
             string m = generateM(senderId,file);
             string datakey = generateDataKey(m);
-            //SaveDataKeyOnServer(senderId,datakey);
             if (datakey != "")
             {
                  EncryptData(datakey, file, senderId);
             }
-
-            ///// Process after entering receivers data on 2nd screen
-            //int tempn = generateN(ri);
-            //int n = validateTempN(tempn, m);
-            //string receiverKey = generateReceiverKey(n);
-            //SaveReceiverKeyOnServer(receiverKey,senderId);
-
-            ///
-            //string line = "";
             //return ReadDataFile(file);
             return null;
         }
@@ -199,14 +190,16 @@ namespace ENC
                     objtbl_datakey.datafilename = Convert.ToString(fileName);
                     objtbl_datakey.datafile = encrypted;
                     objtbl_datakey.datakey = datakey;
-                    db.saveFileDataToDB(objtbl_datakey);
-                    
-                    //d.GenerateDataFile(objtbl_datakey);
-                    d.UploadFileOnCloud(objtbl_datakey, file);
+                    db.saveFileDataToDB(objtbl_datakey); //sql
+
+                    //d.UploadFileOnCloud(objtbl_datakey, file); //aws s3
+                    //b.UploadFileOnAzure(objtbl_datakey, file); //azure
+                    CycladeManager c = new CycladeManager();
+                    c.UploadFileOnCyclade(objtbl_datakey, file);// cyclade
                     return "success";
                 }
                 return "failure";
-                return null;
+               // return null;
             }
             catch(Exception ex)
             {
@@ -237,17 +230,23 @@ namespace ENC
         static string Decrypt(byte[] cipherText, byte[] Key, byte[] IV)
         {
             string plaintext = null;
-            using (AesManaged aes = new AesManaged())
+            try
             {
-                ICryptoTransform decryptor = aes.CreateDecryptor(Key, IV);
-                using (MemoryStream ms = new MemoryStream(cipherText))
+                using (AesManaged aes = new AesManaged())
                 {
-                    using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                    ICryptoTransform decryptor = aes.CreateDecryptor(Key, IV);
+                    using (MemoryStream ms = new MemoryStream(cipherText))
                     {
-                        using (StreamReader reader = new StreamReader(cs))
-                            plaintext = reader.ReadToEnd();
+                        using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                        {
+                            using (StreamReader reader = new StreamReader(cs))
+                                plaintext = reader.ReadToEnd();
+                        }
                     }
                 }
+            }
+            catch (Exception ex) { 
+            
             }
             return plaintext;
         }
