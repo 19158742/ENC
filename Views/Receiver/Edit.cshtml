@@ -4,20 +4,19 @@
     ViewBag.Title = "Edit";
 }
 
-<h2>Edit</h2>
+<h2>Edit Receiver's Information</h2>
 
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
     
     <div class="form-horizontal">
-        <h4>tbl_receiverinfo</h4>
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @Html.HiddenFor(model => model.receiver_id)
 
         <div class="form-group">
-            @Html.LabelFor(model => model.receiver_name, htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.Label("Name", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.EditorFor(model => model.receiver_name, new { htmlAttributes = new { @class = "form-control" } })
                 @Html.ValidationMessageFor(model => model.receiver_name, "", new { @class = "text-danger" })
@@ -25,7 +24,7 @@
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.receiver_email, htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.Label("Email", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.EditorFor(model => model.receiver_email, new { htmlAttributes = new { @class = "form-control" } })
                 @Html.ValidationMessageFor(model => model.receiver_email, "", new { @class = "text-danger" })

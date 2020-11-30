@@ -4,7 +4,7 @@
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
+<h2>Shared Data</h2>
 
 <p>
     @Html.ActionLink("Create New", "Create")
@@ -35,8 +35,6 @@
             @Html.DisplayFor(modelItem => item.datafilename)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.srid }) |
-            @Html.ActionLink("Details", "Details", new { id=item.srid }) |
             @Html.ActionLink("Delete", "Delete", new { id=item.srid })
         </td>
     </tr>

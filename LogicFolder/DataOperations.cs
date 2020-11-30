@@ -18,6 +18,7 @@ namespace ENC
     public class DataOperations
     {
         BlobManager b = new BlobManager("azurecontainer");
+        CycladeManager c = new CycladeManager();
         internal string generateSenderAttribute(string senderFirstName, string senderLastName, string senderEmail, string senderSecretWord)
         {
             string attr = senderFirstName.Substring(0, 2) + senderLastName.Substring(1, 2) + senderEmail.Substring(2, 5) + senderSecretWord.Substring(0, 1);
@@ -60,13 +61,27 @@ namespace ENC
             if (resValidation.Equals("success"))
             {
                 string datakey = db.getDataKey(datakeyid);
-                byte[] getencryptedmsg = db.getEncryptedMsg(datakeyid); //getting encrypted data from sql
-                string mydata = r.getDecryptedData(getencryptedmsg, datakey);
 
-                //byte[] getencryptedmsgfromcloud = downloadDataFromCloud(datakeyid); //aws
-                byte[] getencryptedmsgfromazure = b.downloadAzuereData(datakeyid);
-                string myclouddata = r.getDecryptedData(getencryptedmsgfromazure, datakey);
-                return mydata;
+
+                /* //local sql
+                 * byte[] getencryptedmsg = db.getEncryptedMsg(datakeyid); //getting encrypted data from local sql
+                 * string mydata = r.getDecryptedData(getencryptedmsg, datakey); 
+                 */
+                //cyclade
+
+                byte[] getencryptedmsgfromcyclade = c.downloadCycladeData(datakeyid);
+                string myclouddata = r.getDecryptedData(getencryptedmsgfromcyclade, datakey);
+                /* //aws
+                 * byte[] getencryptedmsgfromaws = downloadDataFromCloud(datakeyid);
+                 * string myclouddata = r.getDecryptedData(getencryptedmsgfromaws, datakey);
+                 */
+
+                /* // azure
+                 * byte[] getencryptedmsgfromazure = b.downloadAzuereData(datakeyid); 
+                 * string myclouddata = r.getDecryptedData(getencryptedmsgfromazure, datakey);
+                 */
+                //return mydata;
+                return myclouddata;
             }
             else
             {

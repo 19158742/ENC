@@ -51,7 +51,7 @@ namespace ENC.Controllers
         [HttpPost]
         public JsonResult Index(string datakey_id,string srid, string r_key , string s_name, string s_lname,string s_email)
         {
-            string receiver_key = "-5998";
+            string receiver_key = "67593";
             string sender_fname = "shraddha";
             string sender_lname = "mhatre";
             string sender_email = "shraddha@gmail.com";

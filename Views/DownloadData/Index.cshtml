@@ -11,51 +11,60 @@
 
 @using (Html.BeginForm("DownloadDataModel", "DownloadData", FormMethod.Post))
 {
-    
-
-    for (int i = 0; i < Model.listdownloadDataModel.Count; i++)
+<div style="display: flex;">
+    @for (int i = 0; i < Model.listdownloadDataModel.Count; i++)
     {
-        @Html.Label("File name - ") @Html.DisplayFor(modelItem => modelItem.listdownloadDataModel[i].datafilename)
-        <br />
-        @Html.Label("Receiver's Key")
-        @Html.TextBoxFor(modelItem => modelItem.listdownloadDataModel[i].rkey)
-        <br />
-        @Html.Label("Sender's First Name")
-        @Html.EditorFor(modelItem => modelItem.listdownloadDataModel[i].sfname)
-        <br />
-        @Html.Label("Sender's Last Name")
-        @Html.EditorFor(modelItem => modelItem.listdownloadDataModel[i].slname)
-        <br />
-        @Html.Label("Sender's Email")
-        @Html.EditorFor(modelItem => modelItem.listdownloadDataModel[i].semail)
-        <br />
-        if(Model.listdownloadDataModel[i].rkey == null) { Model.listdownloadDataModel[i].rkey = "null"; }
-        if (Model.listdownloadDataModel[i].sfname == null) { Model.listdownloadDataModel[i].sfname = "null"; }
-        if (Model.listdownloadDataModel[i].slname == null) { Model.listdownloadDataModel[i].slname = "null"; }
-        if (Model.listdownloadDataModel[i].semail == null) { Model.listdownloadDataModel[i].semail = "null"; }
-        <input type="button" value="DownloadDataModel" onclick="getFile(@Model.listdownloadDataModel[i].datakey_id,@Model.listdownloadDataModel[i].sr_id,@Model.listdownloadDataModel[i].rkey,@Model.listdownloadDataModel[i].sfname,@Model.listdownloadDataModel[i].slname,@Model.listdownloadDataModel[i].semail);" />
-    }
-    <div id="txtResponse"></div>
-}
+        <div class="card" style="width: 30%; height: 40%; padding: 1%;margin-left: 2%; background-color: #eeeeee;">
 
-<script type="text/javascript">
-    function getFile(datakeyid, sr_id,rkey,sfname,slname,semail) {
-        var url = "/DownloadData/Index";
-
-        $.ajax({
-            type: 'POST',
-            url: url,
-            dataType: "json",
-            traditional: true,
-            contentType: "application/json",
-            data: JSON.stringify({ 'datakey_id': datakeyid, 'srid': sr_id,'r_key': rkey,'s_name': sfname,'s_lname': slname,'s_email': semail }),            
-            success: function (data) {
-                document.getElementById('txtResponse').innerHTML = JSON.stringify(data.Data);
-            },
-            error: function (xhr, status, error) {
-                var errorText = xhr.status + "\r\n" + status + "\r\n" + error;
-                document.getElementById('txtResponse').innerHTML = errorText;
+            @Html.Label("File name - ") @Html.DisplayFor(modelItem => modelItem.listdownloadDataModel[i].datafilename, new { htmlAttributes = new { @class = "form-control card-title card-header" } })
+            <br />
+            @Html.Label("Receiver's Key")
+            @Html.EditorFor(modelItem => modelItem.listdownloadDataModel[i].rkey, new { htmlAttributes = new { @class = "form-control" } })
+            <br />
+            @Html.Label("Sender's First Name")
+            @Html.EditorFor(modelItem => modelItem.listdownloadDataModel[i].sfname, new { htmlAttributes = new { @class = "form-control" } })
+            <br />
+            @Html.Label("Sender's Last Name")
+            @Html.EditorFor(modelItem => modelItem.listdownloadDataModel[i].slname, new { htmlAttributes = new { @class = "form-control" } })
+            <br />
+            @Html.Label("Sender's Email")
+            @Html.EditorFor(modelItem => modelItem.listdownloadDataModel[i].semail, new { htmlAttributes = new { @class = "form-control" } })
+            <br />
+            @{ if (Model.listdownloadDataModel[i].rkey == null) { Model.listdownloadDataModel[i].rkey = "null"; }
+                if (Model.listdownloadDataModel[i].sfname == null) { Model.listdownloadDataModel[i].sfname = "null"; }
+                if (Model.listdownloadDataModel[i].slname == null) { Model.listdownloadDataModel[i].slname = "null"; }
+                if (Model.listdownloadDataModel[i].semail == null) { Model.listdownloadDataModel[i].semail = "null"; }
             }
-        });
+            <input type="button" value="Download" class="btn btn-primary" onclick="getFile(@Model.listdownloadDataModel[i].datakey_id,@Model.listdownloadDataModel[i].sr_id,@Model.listdownloadDataModel[i].rkey,@Model.listdownloadDataModel[i].sfname,@Model.listdownloadDataModel[i].slname,@Model.listdownloadDataModel[i].semail);" />
+
+        </div>
     }
-</script>
+</div>
+    <div id="txtResponse"></div>
+
+    }
+<head>
+    
+    <script type="text/javascript">
+        function getFile(datakeyid, sr_id, rkey, sfname, slname, semail) {
+            var url = "/DownloadData/Index";
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                dataType: "json",
+                traditional: true,
+                contentType: "application/json",
+                data: JSON.stringify({ 'datakey_id': datakeyid, 'srid': sr_id, 'r_key': rkey, 's_name': sfname, 's_lname': slname, 's_email': semail }),
+                success: function (data) {
+                    document.getElementById('txtResponse').innerHTML = JSON.stringify(data.Data);
+                },
+                error: function (xhr, status, error) {
+                    var errorText = xhr.status + "\r\n" + status + "\r\n" + error;
+                    document.getElementById('txtResponse').innerHTML = errorText;
+                }
+            });
+        }
+
+    </script>
+</head>  

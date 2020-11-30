@@ -194,6 +194,8 @@ namespace ENC
 
                     //d.UploadFileOnCloud(objtbl_datakey, file); //aws s3
                     //b.UploadFileOnAzure(objtbl_datakey, file); //azure
+                    CycladeManager c = new CycladeManager();
+                    c.UploadFileOnCyclade(objtbl_datakey, file);// cyclade
                     return "success";
                 }
                 return "failure";
