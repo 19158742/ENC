@@ -11,6 +11,8 @@ using System.Web.WebPages;
 using System.Data.Entity;
 using System.Web.UI.WebControls;
 using System.Net.Http;
+using System.Configuration;
+using Newtonsoft.Json;
 
 namespace ENC
 {
@@ -35,15 +37,26 @@ namespace ENC
 
         
 
-        public string generateReceiverKey(int n)
+        public string generateReceiverKey(int n, string senderattr)
         {
             string nkey = Convert.ToString(n);
-            if (nkey.IsEmpty())
+            int len = senderattr.Length;
+            int randomnumber = 0;
+            int finalnumber = 0;
+            if (nkey.Contains("-"))
             {
-                return ""; //use sender's attribute
-
+                randomnumber = Convert.ToInt32(nkey.Split('-')[1]);
             }
-            return nkey;
+            else if (nkey.IsEmpty())
+            {
+                randomnumber = 1; 
+            }
+            else
+            {
+                randomnumber = n;
+            }
+            finalnumber = randomnumber + len;
+            return Convert.ToString(randomnumber);
         }
 
         private string EncryptData(string datakey, HttpPostedFileBase file, int senderId)
@@ -60,8 +73,7 @@ namespace ENC
         {
             if(m.IsEmpty())
             {
-                return ""; 
-                
+                m = Convert.ToString(ConfigurationManager.AppSettings["DefaultMValue"]); 
             }
             return m;
         }
@@ -162,7 +174,8 @@ namespace ENC
 
         static byte[] Encrypt(string plainText, byte[] Key, byte[] IV)
         {
-            byte[] encrypted;  
+            byte[] encrypted;
+            string ciphertext = PlainToCipher(plainText, Key);
             using (AesManaged aes = new AesManaged())
             {  
                 ICryptoTransform encryptor = aes.CreateEncryptor(Key, IV);
@@ -171,13 +184,16 @@ namespace ENC
                     using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
                     {
                         using (StreamWriter sw = new StreamWriter(cs))
-                            sw.Write(plainText);
+                            sw.Write(ciphertext);
                         encrypted = ms.ToArray();
                     }
                 }
             } 
             return encrypted;
         }
+
+    
+
         private string WriteTofile(byte[] encrypted, HttpPostedFileBase file, int senderId, string datakey)
         {
             try
@@ -194,8 +210,8 @@ namespace ENC
 
                     //d.UploadFileOnCloud(objtbl_datakey, file); //aws s3
                     //b.UploadFileOnAzure(objtbl_datakey, file); //azure
-                    CycladeManager c = new CycladeManager();
-                    c.UploadFileOnCyclade(objtbl_datakey, file);// cyclade
+                    //CycladeManager c = new CycladeManager();
+                    //c.UploadFileOnCyclade(objtbl_datakey, file);// cyclade
                     return "success";
                 }
                 return "failure";
@@ -225,8 +241,119 @@ namespace ENC
             {
                  decrypted = Decrypt(encrypted, resultDataKey, aes.IV);
             }
-            return decrypted;
+
+            string retrievedata =  CipherToPlain(decrypted, resultDataKey);
+            return retrievedata;
         }
+
+        private static string PlainToCipher(string plainText, byte[] key)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var c in plainText)
+            {
+                char currentChar = (char)c;
+                char modifiedChar = ModifyChar(currentChar, key);
+                sb.Append(modifiedChar);
+            }
+            return sb.ToString();
+        }
+
+        private string CipherToPlain(string decrypted, byte[] resultDataKey)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var c in decrypted)
+            {
+                char currentChar = (char)c;
+                char originalChar = OriginalChar(currentChar, resultDataKey);
+                sb.Append(originalChar);
+            }
+            return sb.ToString();
+        }
+        private static char ModifyChar(char currentChar, byte[] key)
+        {
+            string str = System.Text.Encoding.UTF8.GetString(key);
+            int n = Convert.ToInt32(ConfigurationManager.AppSettings["DataKeyNumber"]);
+            char num = str[n];
+            int extractedShift = Convert.ToInt32(num.ToString());
+            char c = '@';
+            string filename = "primaryjsondata.json";
+            using (StreamReader r = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + @"LogicFolder\" + filename))
+            {
+                int pos = 0;
+                string json = r.ReadToEnd();
+                dynamic array = JsonConvert.DeserializeObject(json);
+                foreach (var item in array)
+                {
+                    if (item.value == currentChar)
+                    {
+                        pos = Convert.ToInt32(item.key) + extractedShift;
+                        if (pos > array.Count)
+                        {
+                            pos = pos - array.Count - 1;
+                        }
+                    }
+                }
+                foreach (var val in array)
+                {
+                    if (val.key == pos)
+                    {
+                        c = (char)val.value;
+                    }
+                }
+            }
+            if(c == '@')
+            {
+                c = ' ';
+            }
+            return c;
+        }
+
+        private char OriginalChar(char currentChar, byte[] resultDataKey)
+        {
+            string str = System.Text.Encoding.UTF8.GetString(resultDataKey);
+            int n = Convert.ToInt32(ConfigurationManager.AppSettings["DataKeyNumber"]);
+            char num = str[n];
+            int extractedShift = Convert.ToInt32(num.ToString());
+            char c = '@';
+            string filename = "primaryjsondata.json";
+            using (StreamReader r = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + @"LogicFolder\" + filename))
+            {
+                int pos = 0;
+                bool flag = false;
+                int notfoundvalue = 99;
+                string json = r.ReadToEnd();
+                dynamic array = JsonConvert.DeserializeObject(json);
+                foreach (var item in array)
+                {
+                    if (item.value == currentChar)
+                    {
+                        pos = Convert.ToInt32(item.key) - extractedShift;
+                        if(pos < 0)
+                        {
+                            pos = pos + array.Count;
+                        }
+                        flag = true;
+                    }
+                }
+                if (flag == false && pos == 0)
+                {
+                    pos = notfoundvalue;
+                }
+                foreach (var val in array)
+                {
+                    if (val.key == pos)
+                    {
+                        c = (char)val.value;
+                    }
+                }
+                if(c == '@' || pos == notfoundvalue)
+                {
+                    c = ' ';
+                }
+            }
+            return c;
+        }
+
         static string Decrypt(byte[] cipherText, byte[] Key, byte[] IV)
         {
             string plaintext = null;

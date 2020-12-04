@@ -94,7 +94,7 @@ namespace ENC
             // Retrieve reference to a blob named "trimmedString"
             CloudBlockBlob blockBlob2 = container.GetBlockBlobReference(keyName);
 
-            string text;
+            //string text;
             using (var memoryStream = new MemoryStream())
             {
                 blockBlob2.DownloadToStream(memoryStream);

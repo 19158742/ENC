@@ -49,19 +49,15 @@ namespace ENC.Controllers
         }
 
         [HttpPost]
-        public JsonResult Index(string datakey_id,string srid, string r_key , string s_name, string s_lname,string s_email)
+        public HttpResponseMessage Index(string datakey_id,string srid, string r_key , string s_name, string s_lname,string s_email)
         {
-            string receiver_key = "67593";
-            string sender_fname = "shraddha";
-            string sender_lname = "mhatre";
-            string sender_email = "shraddha@gmail.com";
-            string msg = d.getData(Convert.ToInt32(srid), Convert.ToInt32(datakey_id), receiver_key, sender_fname, sender_lname, sender_email);
+            string msg = d.getData(Convert.ToInt32(srid), Convert.ToInt32(datakey_id), r_key, s_name, s_lname, s_email);
             if (msg != null)
             {
                 byte[] msgtobytes = Encoding.ASCII.GetBytes(msg);
                 HttpContext context = System.Web.HttpContext.Current;
                 context.Response.BinaryWrite(msgtobytes);
-                context.Response.ContentType = "text/plain";
+                context.Response.ContentType = "application/download";
                 context.Response.AppendHeader("Content-Length", msgtobytes.Length.ToString());
                 context.Response.OutputStream.Write(msgtobytes, 0, (int)msgtobytes.Length);
                 context.Response.End();
@@ -72,12 +68,12 @@ namespace ENC.Controllers
                 httpResponseMessage.Content = new StreamContent(stream);
                 httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
                 httpResponseMessage.Content.Headers.ContentDisposition.FileName = fileName;
-                httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
+                httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/download");
                 if (httpResponseMessage.Content == null)
                 {
-                    httpResponseMessage.Content = new StringContent("");
+                    httpResponseMessage.Content = new StringContent("hello no content returned");
                 }
-                //return httpResponseMessage;
+                return httpResponseMessage;
                 /* //Write to file on specific destination folder
                 var path = @"D:\ABC\demo.txt";
                 using (StreamWriter sw = new StreamWriter(path)) 
@@ -89,7 +85,8 @@ namespace ENC.Controllers
                 //string _path = Path.Combine(Server.MapPath("~/UploadedFiles"), "demo");
                 //file.SaveAs(_path);
             }
-            return Json(true, JsonRequestBehavior.AllowGet);
+            return null;
+            //return Json(true, JsonRequestBehavior.AllowGet);
             //return View(datalists);
         }
 

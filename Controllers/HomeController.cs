@@ -25,7 +25,7 @@ namespace ENC.Controllers
             try
             {
                 int senderId = 0;
-                string processFile = "";
+                //string processFile = "";
                 if (file.ContentLength > 0)
                 {
                     string senderFirstName = "abc";
