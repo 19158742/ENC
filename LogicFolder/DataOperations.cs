@@ -49,7 +49,8 @@ namespace ENC
             r.receiverName = receiverInfo.receiver_name;
             int tempn = rf.generateN(r);
             int n = rf.validateTempN(tempn, tbl_SR_allocation.tbldatakey_id);
-            string receiverKey = rf.generateReceiverKey(n);
+            string senderattr = db.tbl_senderinfo.Where(x => x.sender_id == tbl_SR_allocation.sender_id).Select(x => x.sender_attribute).FirstOrDefault().ToString();
+            string receiverKey = rf.generateReceiverKey(n,senderattr);
             tbl_SR_allocation.receiver_key = receiverKey;
             dbo.SaveReceiverKeyOnServer(tbl_SR_allocation);
         }
@@ -63,14 +64,15 @@ namespace ENC
                 string datakey = db.getDataKey(datakeyid);
 
 
-                /* //local sql
-                 * byte[] getencryptedmsg = db.getEncryptedMsg(datakeyid); //getting encrypted data from local sql
-                 * string mydata = r.getDecryptedData(getencryptedmsg, datakey); 
-                 */
-                //cyclade
-
-                byte[] getencryptedmsgfromcyclade = c.downloadCycladeData(datakeyid);
-                string myclouddata = r.getDecryptedData(getencryptedmsgfromcyclade, datakey);
+                //local sql
+                 byte[] getencryptedmsg = db.getEncryptedMsg(datakeyid); //getting encrypted data from local sql
+                  string myclouddata = r.getDecryptedData(getencryptedmsg, datakey); 
+                 
+                /* //cyclade
+                * byte[] getencryptedmsgfromcyclade = c.downloadCycladeData(datakeyid);
+                * string myclouddata = r.getDecryptedData(getencryptedmsgfromcyclade, datakey);
+                * /
+                * 
                 /* //aws
                  * byte[] getencryptedmsgfromaws = downloadDataFromCloud(datakeyid);
                  * string myclouddata = r.getDecryptedData(getencryptedmsgfromaws, datakey);
