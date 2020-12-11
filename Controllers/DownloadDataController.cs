@@ -48,47 +48,47 @@ namespace ENC.Controllers
             return View(listddl);
         }
 
-        [HttpPost]
-        public HttpResponseMessage Index(string datakey_id,string srid, string r_key , string s_name, string s_lname,string s_email)
-        {
-            string msg = d.getData(Convert.ToInt32(srid), Convert.ToInt32(datakey_id), r_key, s_name, s_lname, s_email);
-            if (msg != null)
-            {
-                byte[] msgtobytes = Encoding.ASCII.GetBytes(msg);
-                HttpContext context = System.Web.HttpContext.Current;
-                context.Response.BinaryWrite(msgtobytes);
-                context.Response.ContentType = "application/download";
-                context.Response.AppendHeader("Content-Length", msgtobytes.Length.ToString());
-                context.Response.OutputStream.Write(msgtobytes, 0, (int)msgtobytes.Length);
-                context.Response.End();
+        //[HttpPost]
+        //public HttpResponseMessage Index(string datakey_id,string srid, string r_key , string s_name, string s_lname,string s_email)
+        //{
+        //    string msg = d.getData(Convert.ToInt32(srid), Convert.ToInt32(datakey_id), r_key, s_name, s_lname, s_email);
+        //    if (msg != null)
+        //    {
+        //        byte[] msgtobytes = Encoding.ASCII.GetBytes(msg);
+        //        HttpContext context = System.Web.HttpContext.Current;
+        //        context.Response.BinaryWrite(msgtobytes);
+        //        context.Response.ContentType = "application/download";
+        //        context.Response.AppendHeader("Content-Length", msgtobytes.Length.ToString());
+        //        context.Response.OutputStream.Write(msgtobytes, 0, (int)msgtobytes.Length);
+        //        context.Response.End();
 
-                string fileName = Guid.NewGuid() + ".txt";
-                Stream stream = new MemoryStream(msgtobytes);
-                HttpResponseMessage httpResponseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-                httpResponseMessage.Content = new StreamContent(stream);
-                httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
-                httpResponseMessage.Content.Headers.ContentDisposition.FileName = fileName;
-                httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/download");
-                if (httpResponseMessage.Content == null)
-                {
-                    httpResponseMessage.Content = new StringContent("hello no content returned");
-                }
-                return httpResponseMessage;
-                /* //Write to file on specific destination folder
-                var path = @"D:\ABC\demo.txt";
-                using (StreamWriter sw = new StreamWriter(path)) 
-                {
-                    sw.Write(msg);
-                }*/
-                //System.IO.File.WriteAllText(@"D:\ABC\", msg);// Write Final Data To File
-                //string _FileName = Path.GetFileName(file.FileName);
-                //string _path = Path.Combine(Server.MapPath("~/UploadedFiles"), "demo");
-                //file.SaveAs(_path);
-            }
-            return null;
-            //return Json(true, JsonRequestBehavior.AllowGet);
-            //return View(datalists);
-        }
+        //        string fileName = Guid.NewGuid() + ".txt";
+        //        Stream stream = new MemoryStream(msgtobytes);
+        //        HttpResponseMessage httpResponseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+        //        httpResponseMessage.Content = new StreamContent(stream);
+        //        httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+        //        httpResponseMessage.Content.Headers.ContentDisposition.FileName = fileName;
+        //        httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/download");
+        //        if (httpResponseMessage.Content == null)
+        //        {
+        //            httpResponseMessage.Content = new StringContent("hello no content returned");
+        //        }
+        //        return httpResponseMessage;
+        //        /* //Write to file on specific destination folder
+        //        var path = @"D:\ABC\demo.txt";
+        //        using (StreamWriter sw = new StreamWriter(path)) 
+        //        {
+        //            sw.Write(msg);
+        //        }*/
+        //        //System.IO.File.WriteAllText(@"D:\ABC\", msg);// Write Final Data To File
+        //        //string _FileName = Path.GetFileName(file.FileName);
+        //        //string _path = Path.Combine(Server.MapPath("~/UploadedFiles"), "demo");
+        //        //file.SaveAs(_path);
+        //    }
+        //    return null;
+        //    //return Json(true, JsonRequestBehavior.AllowGet);
+        //    //return View(datalists);
+        //}
 
         // GET: DownloadData/Details/5
         public ActionResult Details(int? id)

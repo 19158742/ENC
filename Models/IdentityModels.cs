@@ -21,7 +21,7 @@ namespace ENC.Models
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext()
-            : base("DefaultConnection", throwIfV1Schema: false)
+            : base("DBModel", throwIfV1Schema: false)
         {
         }
 

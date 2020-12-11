@@ -22,14 +22,14 @@ namespace ENC
         DataOperations d = new DataOperations();
         DBOperations db = new DBOperations();
         BlobManager b = new BlobManager("azurecontainer");
-        internal string ProcessThisFile(int senderId,HttpPostedFileBase file)
+        internal string ProcessThisFile(int senderId,HttpPostedFileBase file, int cloudType)
         {
             //upload data screen
             string m = generateM(senderId,file);
             string datakey = generateDataKey(m);
             if (datakey != "")
             {
-                 EncryptData(datakey, file, senderId);
+                 EncryptData(datakey, file, senderId,cloudType);
             }
             //return ReadDataFile(file);
             return null;
@@ -59,9 +59,9 @@ namespace ENC
             return Convert.ToString(randomnumber);
         }
 
-        private string EncryptData(string datakey, HttpPostedFileBase file, int senderId)
+        private string EncryptData(string datakey, HttpPostedFileBase file, int senderId, int cloudType)
         {
-            return ReadDataFile(datakey, file,senderId);
+            return ReadDataFile(datakey, file,senderId,cloudType);
         }
 
         private void SaveDataKeyOnServer(int senderId, string datakey)
@@ -132,7 +132,7 @@ namespace ENC
             //Generate integer m based on sender's attribute , filesize, currentday
         }
 
-        private string ReadDataFile(string datakey, HttpPostedFileBase file, int senderId)//Encryption
+        private string ReadDataFile(string datakey, HttpPostedFileBase file, int senderId, int cloudType)//Encryption
         {           
             BinaryReader b = new BinaryReader(file.InputStream);
             byte[] binData = b.ReadBytes(file.ContentLength);
@@ -145,7 +145,7 @@ namespace ENC
             using (AesManaged aes = new AesManaged())
             {
                 byte[] encrypted = Encrypt(resultRawData, resultDataKey, aes.IV);
-                WriteTofile(encrypted, file,senderId,datakey);
+                WriteTofile(encrypted, file,senderId,datakey, cloudType);
             }
             return null;
             //System.Text.Encoding.UTF8.GetString(encrypted) --output
@@ -194,7 +194,7 @@ namespace ENC
 
     
 
-        private string WriteTofile(byte[] encrypted, HttpPostedFileBase file, int senderId, string datakey)
+        private string WriteTofile(byte[] encrypted, HttpPostedFileBase file, int senderId, string datakey, int cloudType)
         {
             try
             {
@@ -204,14 +204,22 @@ namespace ENC
                     tbl_datakey objtbl_datakey = new tbl_datakey();
                     objtbl_datakey.sender_id = senderId;
                     objtbl_datakey.datafilename = Convert.ToString(fileName);
-                    objtbl_datakey.datafile = encrypted;
+                    objtbl_datakey.datafile = encrypted; // if you want to save encrypted data in database
                     objtbl_datakey.datakey = datakey;
-                    db.saveFileDataToDB(objtbl_datakey); //sql
-
-                    //d.UploadFileOnCloud(objtbl_datakey, file); //aws s3
-                    //b.UploadFileOnAzure(objtbl_datakey, file); //azure
-                    //CycladeManager c = new CycladeManager();
-                    //c.UploadFileOnCyclade(objtbl_datakey, file);// cyclade
+                    db.saveFileDataToDB(objtbl_datakey); //rds sql
+                    if (cloudType == 1)
+                    {
+                        d.UploadFileOnCloud(objtbl_datakey, file); //aws s3
+                    }
+                    else if (cloudType == 2)
+                    {
+                        b.UploadFileOnAzure(objtbl_datakey, file); //azure
+                    }
+                    else if (cloudType == 3)
+                    {
+                        CycladeManager c = new CycladeManager();
+                        c.UploadFileOnCyclade(objtbl_datakey, file);// cyclade
+                    }
                     return "success";
                 }
                 return "failure";
@@ -227,7 +235,7 @@ namespace ENC
             //file.SaveAs(_path);
         }
 
-        //-----//
+
 
         
         public string getDecryptedData(byte[] encrypted,string datakey)

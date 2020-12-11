@@ -97,10 +97,11 @@ namespace ENC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult UploadFile(int id, HttpPostedFileBase file)
         {
+            int cloudType = Convert.ToInt32(Request["ddlCloudList"].ToString());
             Console.WriteLine(DateTime.Now.TimeOfDay);
-            r.ProcessThisFile(id,file);
+            r.ProcessThisFile(id,file,cloudType);
             Console.WriteLine(DateTime.Now.TimeOfDay);
-            return RedirectToAction("Index");
+            return RedirectToAction("UploadFile", ViewData["DisplayTime"]);
         }
 
         // POST: Sender/Edit/5
