@@ -40,15 +40,15 @@
         </div>
     }
 </div>
-    <div id="txtResponse"></div>
+<a id="download_link" download="exported_file.txt" href=””>Download as Text File</a>
 
     }
 <head>
     
     <script type="text/javascript">
         function getFile(curelem, datakeyid, sr_id, rkey, sfname, slname, semail) {
-            var url = "/DownloadData/Index";
-            var r="",sf="",sl="",se="";
+            var url = "/api/Getfile"
+            var r = "", sf = "", sl = "", se = "";
             for (i = 0; i < curelem.parentElement.children.length; i++) {
                 if (curelem.parentElement.children[i].nodeName == "INPUT") {
                     if (curelem.parentElement.children[i].name.includes("rkey")) {
@@ -65,16 +65,17 @@
                     }
                 }
             }
+
             $.ajax({
-                type: 'POST',
+                type: 'GET',
                 url: url,
-                dataType: "json",
                 traditional: true,
-                responseType: 'blob',
                 contentType: "application/download",
-                data: JSON.stringify({ 'datakey_id': datakeyid, 'srid': sr_id, 'r_key': '67604', 's_name': 'shraddha', 's_lname': 'mhatre', 's_email': 'shraddha@gmail.com' }),
+                data: {datakey_id: datakeyid, srid: sr_id, r_key: '67604', s_name: 'shraddha', s_lname: 'mhatre', s_email: 'shraddha@gmail.com' },
                 success: function (data) {
-                    document.getElementById('txtResponse').innerHTML = JSON.stringify(data.Data);
+                    var data = new Blob([data], { type: 'text/plain' });
+                    var url = window.URL.createObjectURL(data);
+                    document.getElementById('download_link').href = url;
                 },
                 error: function (xhr, status, error) {
                     var errorText = xhr.status + "\r\n" + status + "\r\n" + error;

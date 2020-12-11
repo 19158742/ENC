@@ -13,30 +13,48 @@
 @using (Html.BeginForm("UploadFile", "Sender", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
-<div style=" display: grid;">
-    <hr />
-    <div class="form-group">
-        @Html.Label("Sender's First Name", htmlAttributes: new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.DisplayFor(model => model.sender_fname, new { htmlAttributes = new { @class = "form-control" } })
+    <div style=" display: grid;">
+        <hr />
+        <div class="form-group">
+            @Html.Label("Sender's First Name", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DisplayFor(model => model.sender_fname, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+        <br />
+        <div class="form-group">
+            @Html.Label("Upload File", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBox("file", "", new { htmlAttributes = new { @class = "form-control myclass" }, type = "file" })
+                @*@Html.ValidationMessageFor("Upload File","", new { @class = "text-danger" })*@
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.Label("Select Location", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @{
+
+                    var selectList = new SelectList(
+                        new List<SelectListItem>
+                        {
+                        new SelectListItem {Text = "Amazon S3", Value = "1"},
+                        new SelectListItem {Text = "Azure", Value = "2"},
+                        new SelectListItem {Text = "Okeanos Global Cyclade", Value = "3"},
+                    }, "Value", "Text");
+
+                    @Html.DropDownList("ddlCloudList", selectList, "Select Option", new { @class = "form-control" })
+                }
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" class="btn btn-primary btn-sm" value="UploadFile" />
+            </div>
         </div>
     </div>
-    <br/>
-    <div class="form-group">
-        @Html.Label("Upload File", htmlAttributes: new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.TextBox("file", "", new { htmlAttributes = new { @class = "form-control myclass" }, type = "file" })
-            @*@Html.ValidationMessageFor("Upload File","", new { @class = "text-danger" })*@
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <input type="submit" class="btn btn-primary btn-sm" value="UploadFile" />
-        </div>
-    </div>
-</div>
 }
-<br/>
-    <p>
-        @Html.ActionLink("Back to List", "Index")
-    </p>
+
+<br />
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>
