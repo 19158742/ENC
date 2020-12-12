@@ -40,7 +40,7 @@
         </div>
     }
 </div>
-<a id="download_link" download="exported_file.txt" href=””>Download as Text File</a>
+<a id="download_link" download="exported_file.txt" href=”” style="display:none;" class="btn btn-link">Download as Text File</a>
 
     }
 <head>
@@ -71,11 +71,14 @@
                 url: url,
                 traditional: true,
                 contentType: "application/download",
-                data: {datakey_id: datakeyid, srid: sr_id, r_key: '67604', s_name: 'shraddha', s_lname: 'mhatre', s_email: 'shraddha@gmail.com' },
+                data: {datakey_id: datakeyid, srid: sr_id, r_key: r, s_name: sf, s_lname: sl, s_email: se },
                 success: function (data) {
-                    var data = new Blob([data], { type: 'text/plain' });
-                    var url = window.URL.createObjectURL(data);
-                    document.getElementById('download_link').href = url;
+                    if (data != "failure") {
+                        var data = new Blob([data], { type: 'text/plain' });
+                        var url = window.URL.createObjectURL(data);
+                        document.getElementById('download_link').style.display = "block";
+                        document.getElementById('download_link').href = url;
+                    }
                 },
                 error: function (xhr, status, error) {
                     var errorText = xhr.status + "\r\n" + status + "\r\n" + error;

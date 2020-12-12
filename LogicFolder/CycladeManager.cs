@@ -56,7 +56,7 @@ namespace ENC
             {
             DataOperations dop = new DataOperations();
             DBOperations db = new DBOperations();
-            string filename = db.getFileNameById(datakeyid);
+            string filename = db.GetFileNameById(datakeyid);
             string keyName = filename.Split('.')[0] + "_" + Convert.ToString(datakeyid) + "." + filename.Split('.')[1];
             
                 using (SftpClient sftp = new SftpClient(host, 22, user, pass))

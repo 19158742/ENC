@@ -258,7 +258,6 @@
     <Compile Include="LogicFolder\ReadFile.cs" />
     <Compile Include="LogicFolder\ReceiverInfo.cs" />
     <Compile Include="LogicFolder\SRInfo.cs" />
-    <Compile Include="LogicFolder\ValidateData.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\DownloadDataModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -350,6 +349,9 @@
     <Content Include="Views\DownloadData\Edit.cshtml" />
     <Content Include="Views\DownloadData\Index.cshtml" />
     <Content Include="Views\SRAllocation\ss.cshtml" />
+    <Content Include="Views\DownloadData\ErrorMsg.cshtml" />
+    <Content Include="Views\Receiver\ErrorMsg.cshtml" />
+    <Content Include="Views\Sender\ErrorMsg.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

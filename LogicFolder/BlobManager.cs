@@ -80,7 +80,7 @@ namespace ENC
         {
             DataOperations dop= new DataOperations();
             DBOperations db = new DBOperations();
-            string filename = db.getFileNameById(datakeyid);
+            string filename = db.GetFileNameById(datakeyid);
             string keyName = filename.Split('.')[0] + "_" + Convert.ToString(datakeyid) + "." + filename.Split('.')[1];
             BlobManager BlobManagerObj = new BlobManager("azurecontainer");
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(System.Configuration.ConfigurationManager.ConnectionStrings["AzureConn"].ConnectionString);

@@ -15,100 +15,76 @@ using System.Web.Services;
 using ENC;
 using ENC.Models;
 
-
-
-
-
 namespace ENC.Controllers
 {
     public class DownloadDataController : Controller
     {
-        private DBModel db = new DBModel();
-        DataOperations d = new DataOperations();
+        private readonly DBModel db = new DBModel();
+        readonly DataOperations d = new DataOperations();
        
         // GET: DownloadData
         public ActionResult Index()
         {
-            //int receiver_id = db.tbl_receiverinfo.Where(x => x.receiver_email.Equals(User.Identity));
-            int receiver_id = 1;
-           
-            var datakeyids = db.tbl_SR_allocation.Where(x => x.receiver_id == receiver_id).Select(x=>new { datakeyid = x.tbldatakey_id, srid= x.sr_id }).ToList();
-            List<DownloadDataModel> datalists = new List<DownloadDataModel>();
-            ListDownloadDataModel listddl = new ListDownloadDataModel();
-            foreach (var key in datakeyids)
+            try
             {
-                DownloadDataModel ddl = new DownloadDataModel();
-                string datafilename = db.tbl_datakey.Where(x => x.tbldatakey_id == key.datakeyid).Select(x => x.datafilename).FirstOrDefault();
-                ddl.datafilename = datafilename;
-                ddl.datakey_id = key.datakeyid;
-                ddl.sr_id = key.srid;
-                datalists.Add(ddl);
+                int receiver_id = db.tbl_receiverinfo.Where(x => x.receiver_email.Equals(User.Identity.Name)).Select(x => x.receiver_id).FirstOrDefault();
+                var datakeyids = db.tbl_SR_allocation.Where(x => x.receiver_id == receiver_id).Select(x => new { datakeyid = x.tbldatakey_id, srid = x.sr_id }).ToList();
+                List<DownloadDataModel> datalists = new List<DownloadDataModel>();
+                ListDownloadDataModel listddl = new ListDownloadDataModel();
+                foreach (var key in datakeyids)
+                {
+                    DownloadDataModel ddl = new DownloadDataModel();
+                    string datafilename = db.tbl_datakey.Where(x => x.tbldatakey_id == key.datakeyid).Select(x => x.datafilename).FirstOrDefault();
+                    ddl.datafilename = datafilename;
+                    ddl.datakey_id = key.datakeyid;
+                    ddl.sr_id = key.srid;
+                    datalists.Add(ddl);
+                }
+                listddl.listdownloadDataModel = datalists;
+                return View(listddl);
             }
-            listddl.listdownloadDataModel = datalists;
-            return View(listddl);
-        }
-
-        //[HttpPost]
-        //public HttpResponseMessage Index(string datakey_id,string srid, string r_key , string s_name, string s_lname,string s_email)
-        //{
-        //    string msg = d.getData(Convert.ToInt32(srid), Convert.ToInt32(datakey_id), r_key, s_name, s_lname, s_email);
-        //    if (msg != null)
-        //    {
-        //        byte[] msgtobytes = Encoding.ASCII.GetBytes(msg);
-        //        HttpContext context = System.Web.HttpContext.Current;
-        //        context.Response.BinaryWrite(msgtobytes);
-        //        context.Response.ContentType = "application/download";
-        //        context.Response.AppendHeader("Content-Length", msgtobytes.Length.ToString());
-        //        context.Response.OutputStream.Write(msgtobytes, 0, (int)msgtobytes.Length);
-        //        context.Response.End();
-
-        //        string fileName = Guid.NewGuid() + ".txt";
-        //        Stream stream = new MemoryStream(msgtobytes);
-        //        HttpResponseMessage httpResponseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-        //        httpResponseMessage.Content = new StreamContent(stream);
-        //        httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
-        //        httpResponseMessage.Content.Headers.ContentDisposition.FileName = fileName;
-        //        httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/download");
-        //        if (httpResponseMessage.Content == null)
-        //        {
-        //            httpResponseMessage.Content = new StringContent("hello no content returned");
-        //        }
-        //        return httpResponseMessage;
-        //        /* //Write to file on specific destination folder
-        //        var path = @"D:\ABC\demo.txt";
-        //        using (StreamWriter sw = new StreamWriter(path)) 
-        //        {
-        //            sw.Write(msg);
-        //        }*/
-        //        //System.IO.File.WriteAllText(@"D:\ABC\", msg);// Write Final Data To File
-        //        //string _FileName = Path.GetFileName(file.FileName);
-        //        //string _path = Path.Combine(Server.MapPath("~/UploadedFiles"), "demo");
-        //        //file.SaveAs(_path);
-        //    }
-        //    return null;
-        //    //return Json(true, JsonRequestBehavior.AllowGet);
-        //    //return View(datalists);
-        //}
+            catch(Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
+        }       
 
         // GET: DownloadData/Details/5
         public ActionResult Details(int? id)
         {
-            if (id == null)
+            try
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
+                if (tbl_SR_allocation == null)
+                {
+                    return HttpNotFound();
+                }
+                return View(tbl_SR_allocation);
             }
-            tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
-            if (tbl_SR_allocation == null)
+            catch (Exception ex)
             {
-                return HttpNotFound();
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
             }
-            return View(tbl_SR_allocation);
         }
 
         // GET: DownloadData/Create
         public ActionResult Create()
         {
-            return View();
+            try
+            {
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         // POST: DownloadData/Create
@@ -118,29 +94,45 @@ namespace ENC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "sr_id,sender_id,receiver_id,tbldatakey_id,receiver_key")] tbl_SR_allocation tbl_SR_allocation)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.tbl_SR_allocation.Add(tbl_SR_allocation);
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
+                if (ModelState.IsValid)
+                {
+                    db.tbl_SR_allocation.Add(tbl_SR_allocation);
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
 
-            return View(tbl_SR_allocation);
+                return View(tbl_SR_allocation);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         // GET: DownloadData/Edit/5
         public ActionResult Edit(int? id)
         {
-            if (id == null)
+            try
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
+                if (tbl_SR_allocation == null)
+                {
+                    return HttpNotFound();
+                }
+                return View(tbl_SR_allocation);
             }
-            tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
-            if (tbl_SR_allocation == null)
+            catch (Exception ex)
             {
-                return HttpNotFound();
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
             }
-            return View(tbl_SR_allocation);
         }
 
         // POST: DownloadData/Edit/5
@@ -150,28 +142,44 @@ namespace ENC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "sr_id,sender_id,receiver_id,tbldatakey_id,receiver_key")] tbl_SR_allocation tbl_SR_allocation)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.Entry(tbl_SR_allocation).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    db.Entry(tbl_SR_allocation).State = EntityState.Modified;
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                return View(tbl_SR_allocation);
             }
-            return View(tbl_SR_allocation);
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         // GET: DownloadData/Delete/5
         public ActionResult Delete(int? id)
         {
-            if (id == null)
+            try
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
+                if (tbl_SR_allocation == null)
+                {
+                    return HttpNotFound();
+                }
+                return View(tbl_SR_allocation);
             }
-            tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
-            if (tbl_SR_allocation == null)
+            catch (Exception ex)
             {
-                return HttpNotFound();
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
             }
-            return View(tbl_SR_allocation);
         }
 
         // POST: DownloadData/Delete/5
@@ -179,10 +187,17 @@ namespace ENC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
-            db.tbl_SR_allocation.Remove(tbl_SR_allocation);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            try {
+                tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
+                db.tbl_SR_allocation.Remove(tbl_SR_allocation);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         protected override void Dispose(bool disposing)
