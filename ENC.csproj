@@ -352,6 +352,7 @@
     <Content Include="Views\DownloadData\ErrorMsg.cshtml" />
     <Content Include="Views\Receiver\ErrorMsg.cshtml" />
     <Content Include="Views\Sender\ErrorMsg.cshtml" />
+    <Content Include="Views\SRAllocation\ErrorMsg.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -42,7 +42,7 @@ namespace ENC.Controllers
                     httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/download");
                     if (httpResponseMessage.Content == null)
                     {
-                        httpResponseMessage.Content = new StringContent("hello no content returned");
+                        httpResponseMessage.Content = new StringContent("Hello no content returned");
                     }
                     return httpResponseMessage;
                 }

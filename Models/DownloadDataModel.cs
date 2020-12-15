@@ -17,6 +17,8 @@ namespace ENC
        
         public string slname { get; set; }
         public string semail { get; set; }
+
+        public string stype { get; set; }
     }
 
     public class ListDownloadDataModel

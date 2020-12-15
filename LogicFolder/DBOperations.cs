@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.UI.WebControls;
 
@@ -143,14 +144,33 @@ namespace ENC
             return dictionary;
         }
 
+        internal string GetServiceType(int datakeyid)
+        {
+            byte[] buffer = db.tbl_datakey.Where(x => x.tbldatakey_id == datakeyid).Select(x => x.datafile).FirstOrDefault();
+            string serviceType = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+            return serviceType;
+        }
+
         internal Dictionary<string, string> GetAllDataFileIds(string senderid)
         {
             int sid = Convert.ToInt32(senderid);
-            var list = db.tbl_datakey.Where(x=>x.sender_id == sid).Select(x => new { x.tbldatakey_id, x.datafilename }).ToList();
+            var list = db.tbl_datakey.Where(x=>x.sender_id == sid).Select(x => new { x.tbldatakey_id, x.datafilename, x.datafile }).ToList();
+            
             var dictionary = new Dictionary<string, string>();
             foreach (var l in list)
             {
-                dictionary.Add(Convert.ToString(l.tbldatakey_id), l.datafilename);
+                string serviceType = Encoding.UTF8.GetString(l.datafile);
+                if (serviceType.Equals("A")){
+                    dictionary.Add(Convert.ToString(l.tbldatakey_id), l.datafilename + " in Amazon");
+                }
+                else if (serviceType.Equals("Z"))
+                {
+                    dictionary.Add(Convert.ToString(l.tbldatakey_id), l.datafilename  +" in Azure");
+                }
+                else if (serviceType.Equals("C"))
+                {
+                    dictionary.Add(Convert.ToString(l.tbldatakey_id), l.datafilename + " in Okeanos");
+                }
             }
             return dictionary;
         }

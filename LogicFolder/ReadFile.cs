@@ -31,7 +31,6 @@ namespace ENC
             {
                  EncryptData(datakey, file, senderId,cloudType);
             }
-            //return ReadDataFile(file);
             return null;
         }
 
@@ -93,7 +92,7 @@ namespace ENC
             string str = Convert.ToString(multi).Substring(0, 5);
             int n = Convert.ToInt32(str);
             return n;
-            //Multiply operation of cnt and timestamp and take first 5 digits, then  generate number n
+            //Multiply operation of count and timestamp and take first 5 digits, then  generate number n
         }
 
         private int CountReceiverInfoCharacters(ReceiverInfo ri)
@@ -123,7 +122,6 @@ namespace ENC
             }
             
             return getSpecificChar;
-            //Generate integer m based on sender's attribute , filesize, currentday
         }
 
         private string ReadDataFile(string datakey, HttpPostedFileBase file, int senderId, int cloudType)//Encryption
@@ -142,28 +140,7 @@ namespace ENC
                 WriteTofile(encrypted, file,senderId,datakey, cloudType);
             }
             return null;
-            //System.Text.Encoding.UTF8.GetString(encrypted) --output
 
-
-
-            //result.Replace("\r\n", " ");
-            //string[] lines = result.Split(' ');
-            //foreach (string line in lines)
-            //{
-            //    if (line != null)
-            //    {
-            //        //if (line.Contains(stringToSearch))
-            //        //{
-            //        //    line.Replace(stringToSearch, "newstring");
-            //        //    sbText.AppendLine(line);
-            //        //}
-            //        //else
-            //        //{
-            //        //    sbText.AppendLine(line);
-            //        //}
-            //    }
-            //}
-            
         }
 
         static byte[] Encrypt(string plainText, byte[] Key, byte[] IV)
@@ -198,23 +175,38 @@ namespace ENC
                     tbl_datakey objtbl_datakey = new tbl_datakey
                     {
                         sender_id = senderId,
-                        datafilename = Convert.ToString(fileName),
-                        datafile = encrypted, // if you want to save encrypted data in database
+                        datafilename = Convert.ToString(fileName),                        
                         datakey = datakey
                     };
-                    db.SaveFileDataToDB(objtbl_datakey); //rds sql
                     if (cloudType == 1)
                     {
-                        d.UploadFileOnCloud(objtbl_datakey, file); //aws s3
+                        objtbl_datakey.datafile = Encoding.Default.GetBytes("A");
                     }
                     else if (cloudType == 2)
                     {
-                        b.UploadFileOnAzure(objtbl_datakey, file); //azure
+                        objtbl_datakey.datafile = Encoding.Default.GetBytes("Z");
+                    }
+                    else if (cloudType == 3)
+                    {
+                        objtbl_datakey.datafile = Encoding.Default.GetBytes("C");
+                    }
+                    else
+                    {
+                        objtbl_datakey.datafile = encrypted;// if you want to save encrypted data in database
+                    }
+                    db.SaveFileDataToDB(objtbl_datakey); //rds sql
+                    if (cloudType == 1)
+                    {
+                        d.UploadFileOnCloud(objtbl_datakey,encrypted, file); //aws s3
+                    }
+                    else if (cloudType == 2)
+                    {
+                        b.UploadFileOnAzure(objtbl_datakey,encrypted, file); //azure
                     }
                     else if (cloudType == 3)
                     {
                         CycladeManager c = new CycladeManager();
-                        c.UploadFileOnCyclade(objtbl_datakey, file);// cyclade
+                        c.UploadFileOnCyclade(objtbl_datakey,encrypted, file);// cyclade
                     }
                     return "success";
                 }
@@ -224,10 +216,6 @@ namespace ENC
             {
                 return "failure" + ex.Message.ToString();
             }
-            //System.IO.File.WriteAllText("D:\\UploadedFiles", sbText.ToString());// Write Final Data To File
-            //string _FileName = Path.GetFileName(file.FileName);
-            //string _path = Path.Combine(Server.MapPath("~/UploadedFiles"), _FileName);
-            //file.SaveAs(_path);
         }
 
 
@@ -244,7 +232,10 @@ namespace ENC
             {
                  decrypted = Decrypt(encrypted, resultDataKey, aes.IV);
             }
-
+            if(decrypted.Contains("failureLength of the data to decrypt is invalid."))
+            {
+                return "failure";
+            }
             string retrievedata =  CipherToPlain(decrypted, resultDataKey);
             return retrievedata;
         }

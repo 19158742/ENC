@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Mail;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -53,7 +55,43 @@ namespace ENC
             string receiverKey = rf.GenerateReceiverKey(n,senderattr);
             tbl_SR_allocation.receiver_key = receiverKey;
             dbo.SaveReceiverKeyOnServer(tbl_SR_allocation);
+            SendEmailToReceiver(receiverKey, r.receiverEmail, tbl_SR_allocation);
         }
+
+        private void SendEmailToReceiver(string receiverKey, string receiverEmail, tbl_SR_allocation tbl_SR_allocation)
+        {
+            DBModel db = new DBModel();
+            string senderfname = db.tbl_senderinfo.Where(x => x.sender_id == tbl_SR_allocation.sender_id).Select(x => x.sender_fname).FirstOrDefault();
+            string senderlname = db.tbl_senderinfo.Where(x => x.sender_id == tbl_SR_allocation.sender_id).Select(x => x.sender_lname).FirstOrDefault();
+            string senderemail = db.tbl_senderinfo.Where(x => x.sender_id == tbl_SR_allocation.sender_id).Select(x => x.sender_email).FirstOrDefault();
+            string filename = db.tbl_datakey.Where(x => x.tbldatakey_id == tbl_SR_allocation.tbldatakey_id).Select(x => x.datafilename).FirstOrDefault();
+            string semail = Convert.ToString(ConfigurationManager.AppSettings["semailaddr"]);
+            string spass = Convert.ToString(ConfigurationManager.AppSettings["epassword"]);
+            var sEmail = new MailAddress(semail, "Sender");
+            var reEmail = new MailAddress(receiverEmail, "Receiver");
+            var password = spass;
+            var sub = "New file available for download";
+            var body = "Hello, New file is ready to download. The first name of sender is- "+senderfname+", last name - " + senderlname + ", email - " + senderemail + ", File name - " + filename + " and receiver key - " + receiverKey + ". Please use this information to download the file. Thank you.";
+            var smtp = new SmtpClient
+            {
+                Host = "smtp.gmail.com",
+                Port = 587,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(sEmail.Address, password)
+            };
+            using (var mess = new MailMessage(sEmail.Address, "shraddha2977@gmail.com")
+            {
+                Subject = sub,
+                Body = body
+            })
+            {
+                smtp.Send(mess);
+            }
+        }
+
+       
         public string GetData(int sr_id, int datakeyid, string receiver_key, string sender_fname, string sender_lname, string sender_email)
         {
             DBOperations db = new DBOperations();
@@ -63,20 +101,31 @@ namespace ENC
             if (resValidation.Equals("success"))
             {
                 string datakey = db.GetDataKey(datakeyid);
-
-                 byte[] getencryptedmsg = db.GetEncryptedMsg(datakeyid); //getting encrypted data from sql
-                
-                 //byte[] getencryptedmsg = c.downloadCycladeData(datakeyid); //cyclade              
-                 
-                  
-                 //byte[] getencryptedmsg =  DownloadDataFromCloud(datakeyid);//aws
-                 
-                  //byte[] getencryptedmsg = b.downloadAzuereData(datakeyid); //azure
-                 
-                  myclouddata = r.GetDecryptedData(getencryptedmsg, datakey);
-                 
-                //return mydata;
-                return myclouddata;
+                string servicetype = db.GetServiceType(datakeyid);
+                byte[] getencryptedmsg = null;
+                if (servicetype.Equals("A"))
+                {
+                  getencryptedmsg =  DownloadDataFromCloud(datakeyid);//aws
+                }
+                else if (servicetype.Equals("Z"))
+                {
+                  getencryptedmsg = b.downloadAzuereData(datakeyid); //azure
+                }
+                else if (servicetype.Equals("C"))
+                {
+                  getencryptedmsg = c.downloadCycladeData(datakeyid); //cyclade              
+                }
+                else
+                {
+                  getencryptedmsg = db.GetEncryptedMsg(datakeyid); //getting encrypted data from local sql when testing on localhost
+                }
+                myclouddata = r.GetDecryptedData(getencryptedmsg, datakey);
+                if (myclouddata.Contains("failure"))
+                { return "failure"; }
+                else
+                {
+                    return myclouddata;
+                }
             }
             else
             {
@@ -109,10 +158,10 @@ namespace ENC
             return bytes;
         }
 
-        internal void UploadFileOnCloud(tbl_datakey objtbl_datakey, HttpPostedFileBase file)
+        internal void UploadFileOnCloud(tbl_datakey objtbl_datakey, byte[] encrypted, HttpPostedFileBase file)
         {
             string keyName = Path.GetFileName(file.FileName).Split('.')[0] + "_" + objtbl_datakey.tbldatakey_id + "." + Path.GetFileName(file.FileName).Split('.')[1];
-            Stream stream = new MemoryStream(objtbl_datakey.datafile);
+            Stream stream = new MemoryStream(encrypted);
             string bucketName = ConfigurationManager.AppSettings["BucketName"];
             RegionEndpoint bucketRegion = RegionEndpoint.USEast1;
             string accesskey = ConfigurationManager.AppSettings["AWSAccessKey"];

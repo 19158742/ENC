@@ -156,7 +156,7 @@ namespace ENC.Controllers
                 Console.WriteLine(DateTime.Now.TimeOfDay);
                 r.ProcessThisFile(id, file, cloudType);
                 Console.WriteLine(DateTime.Now.TimeOfDay);
-                return RedirectToAction("UploadFile");
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {

@@ -27,6 +27,7 @@ namespace ENC.Controllers
         {
             try
             {
+                DBOperations dbo = new DBOperations();
                 int receiver_id = db.tbl_receiverinfo.Where(x => x.receiver_email.Equals(User.Identity.Name)).Select(x => x.receiver_id).FirstOrDefault();
                 var datakeyids = db.tbl_SR_allocation.Where(x => x.receiver_id == receiver_id).Select(x => new { datakeyid = x.tbldatakey_id, srid = x.sr_id }).ToList();
                 List<DownloadDataModel> datalists = new List<DownloadDataModel>();
@@ -35,6 +36,18 @@ namespace ENC.Controllers
                 {
                     DownloadDataModel ddl = new DownloadDataModel();
                     string datafilename = db.tbl_datakey.Where(x => x.tbldatakey_id == key.datakeyid).Select(x => x.datafilename).FirstOrDefault();
+                    string servicetype = dbo.GetServiceType(key.datakeyid);
+                    if (servicetype.Equals("A"))
+                    {
+                        ddl.stype = " in Amazon";
+                    }
+                    else if (servicetype.Equals("Z")){
+                        ddl.stype = " in Azure";
+                    }
+                    else if (servicetype.Equals("C"))
+                    {
+                        ddl.stype = " in Okeanos";
+                    }
                     ddl.datafilename = datafilename;
                     ddl.datakey_id = key.datakeyid;
                     ddl.sr_id = key.srid;

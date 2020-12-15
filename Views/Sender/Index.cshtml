@@ -23,7 +23,7 @@
         <th>
             @Html.DisplayName("Secret Word")
         </th>
-        <th>
+        <th style="display:none;">
             @Html.DisplayName("Attribute")
         </th>
         <th></th>
@@ -44,7 +44,7 @@
             <td>
                 @Html.DisplayFor(modelItem => item.secret_word)
             </td>
-            <td>
+            <td style="display:none;">
                 @Html.DisplayFor(modelItem => item.sender_attribute)
             </td>
             <td>
