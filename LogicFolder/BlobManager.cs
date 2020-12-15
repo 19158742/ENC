@@ -40,7 +40,7 @@ namespace ENC
             }
         }
 
-        public string UploadFileOnAzure(tbl_datakey objtbl_datakey, HttpPostedFileBase file)
+        public string UploadFileOnAzure(tbl_datakey objtbl_datakey, byte[] encrypted, HttpPostedFileBase file)
         {
             string AbsoluteUri;
             if (file == null || file.ContentLength == 0)
@@ -48,7 +48,7 @@ namespace ENC
             try
             {
                 string keyName = Path.GetFileName(file.FileName).Split('.')[0] + "_" + objtbl_datakey.tbldatakey_id + "." + Path.GetFileName(file.FileName).Split('.')[1];
-                Stream stream = new MemoryStream(objtbl_datakey.datafile);
+                Stream stream = new MemoryStream(encrypted);
                 string FileName = keyName;
                 CloudBlockBlob blockBlob;
                 blockBlob = blobContainer.GetBlockBlobReference(FileName);
@@ -80,7 +80,7 @@ namespace ENC
         {
             DataOperations dop= new DataOperations();
             DBOperations db = new DBOperations();
-            string filename = db.getFileNameById(datakeyid);
+            string filename = db.GetFileNameById(datakeyid);
             string keyName = filename.Split('.')[0] + "_" + Convert.ToString(datakeyid) + "." + filename.Split('.')[1];
             BlobManager BlobManagerObj = new BlobManager("azurecontainer");
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(System.Configuration.ConfigurationManager.ConnectionStrings["AzureConn"].ConnectionString);

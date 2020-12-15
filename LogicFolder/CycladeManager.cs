@@ -20,20 +20,20 @@ namespace ENC
             {
                 //Start the connection
                 client.Connect();
-                var output = client.RunCommand("echo test");     
+                var output = client.RunCommand("echo connected");     
                 client.Disconnect();
                 Console.WriteLine(output.Result);
             }
         }
 
-        public string UploadFileOnCyclade(tbl_datakey objtbl_datakey, HttpPostedFileBase file)
+        public string UploadFileOnCyclade(tbl_datakey objtbl_datakey, byte[] encrypted, HttpPostedFileBase file)
         {
             if (file == null || file.ContentLength == 0)
                 return null;
             try
             {
                 string keyName = Path.GetFileName(file.FileName).Split('.')[0] + "_" + objtbl_datakey.tbldatakey_id + "." + Path.GetFileName(file.FileName).Split('.')[1];
-                Stream stream = new MemoryStream(objtbl_datakey.datafile);
+                Stream stream = new MemoryStream(encrypted);
                 string FileName = keyName;
                 using (SftpClient sftp = new SftpClient(host, 22, user, pass))
                 {
@@ -56,7 +56,7 @@ namespace ENC
             {
             DataOperations dop = new DataOperations();
             DBOperations db = new DBOperations();
-            string filename = db.getFileNameById(datakeyid);
+            string filename = db.GetFileNameById(datakeyid);
             string keyName = filename.Split('.')[0] + "_" + Convert.ToString(datakeyid) + "." + filename.Split('.')[1];
             
                 using (SftpClient sftp = new SftpClient(host, 22, user, pass))

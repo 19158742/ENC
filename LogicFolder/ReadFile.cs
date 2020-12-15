@@ -18,45 +18,43 @@ namespace ENC
 {
     public class ReadFile
     {
-        ReceiverInfo ri = new ReceiverInfo();
-        DataOperations d = new DataOperations();
-        DBOperations db = new DBOperations();
-        BlobManager b = new BlobManager("azurecontainer");
+        readonly ReceiverInfo ri = new ReceiverInfo();
+        readonly DataOperations d = new DataOperations();
+        readonly DBOperations db = new DBOperations();
+        readonly BlobManager b = new BlobManager("azurecontainer");
         internal string ProcessThisFile(int senderId,HttpPostedFileBase file, int cloudType)
         {
             //upload data screen
-            string m = generateM(senderId,file);
-            string datakey = generateDataKey(m);
+            string m = GenerateM(senderId,file);
+            string datakey = GenerateDataKey(m);
             if (datakey != "")
             {
                  EncryptData(datakey, file, senderId,cloudType);
             }
-            //return ReadDataFile(file);
             return null;
         }
 
         
 
-        public string generateReceiverKey(int n, string senderattr)
+        public string GenerateReceiverKey(int n, string senderattr)
         {
             string nkey = Convert.ToString(n);
             int len = senderattr.Length;
-            int randomnumber = 0;
-            int finalnumber = 0;
+            int randomnumber;
             if (nkey.Contains("-"))
             {
                 randomnumber = Convert.ToInt32(nkey.Split('-')[1]);
             }
             else if (nkey.IsEmpty())
             {
-                randomnumber = 1; 
+                randomnumber = 1;
             }
             else
             {
                 randomnumber = n;
             }
-            finalnumber = randomnumber + len;
-            return Convert.ToString(randomnumber);
+            int finalnumber = randomnumber + len;
+            return Convert.ToString(finalnumber);
         }
 
         private string EncryptData(string datakey, HttpPostedFileBase file, int senderId, int cloudType)
@@ -64,12 +62,7 @@ namespace ENC
             return ReadDataFile(datakey, file,senderId,cloudType);
         }
 
-        private void SaveDataKeyOnServer(int senderId, string datakey)
-        {
-            db.SaveDataKeyOnServer(senderId, datakey);
-        }
-
-        private string generateDataKey(string m)
+        private string GenerateDataKey(string m)
         {
             if(m.IsEmpty())
             {
@@ -78,36 +71,36 @@ namespace ENC
             return m;
         }
 
-        public int validateTempN(int tempn, int datakeyid)
+        public int ValidateTempN(int tempn, int datakeyid)
         {
-            int mlength = db.getMLength(datakeyid);
+            int mlength = db.GetMLength(datakeyid);
             int tempnlength = Convert.ToString(tempn).Length;
             if(tempnlength > mlength)
             {
-                tempn = tempn - mlength;
+                tempn -= mlength;
             }
             return tempn;
             // if length of tempn>m = n= n-m = updatevalue of tempn 
             //else return tempn            
         }
 
-        public int generateN(ReceiverInfo ri)
+        public int GenerateN(ReceiverInfo ri)
         {
 
-            int cntCharacters = countReceiverInfoCharacters(ri);
+            int cntCharacters = CountReceiverInfoCharacters(ri);
             long multi = cntCharacters * Convert.ToInt64(DateTime.Now.Ticks);
             string str = Convert.ToString(multi).Substring(0, 5);
             int n = Convert.ToInt32(str);
             return n;
-            //Multiply operation of cnt and timestamp and take first 5 digits, then  generate number n
+            //Multiply operation of count and timestamp and take first 5 digits, then  generate number n
         }
 
-        private int countReceiverInfoCharacters(ReceiverInfo ri)
+        private int CountReceiverInfoCharacters(ReceiverInfo ri)
         {
             return ri.receiverEmail.Length + ri.receiverName.Length + ri.senderid.Length + ri.datakeyid.Length;
         }
 
-        private string generateM(int senderId, HttpPostedFileBase file)
+        private string GenerateM(int senderId, HttpPostedFileBase file)
         {
             int contentSize = file.ContentLength;
             long finaltempdata = Convert.ToInt64(DateTime.Now.Ticks) * contentSize * senderId;
@@ -120,7 +113,7 @@ namespace ENC
             {
                 while (getSpecificChar.Length != 32)
                 {
-                    getSpecificChar = getSpecificChar + "1";
+                    getSpecificChar += "1";
                 }
             }
             if (getSpecificChar.Length > 32) {
@@ -129,7 +122,6 @@ namespace ENC
             }
             
             return getSpecificChar;
-            //Generate integer m based on sender's attribute , filesize, currentday
         }
 
         private string ReadDataFile(string datakey, HttpPostedFileBase file, int senderId, int cloudType)//Encryption
@@ -148,28 +140,7 @@ namespace ENC
                 WriteTofile(encrypted, file,senderId,datakey, cloudType);
             }
             return null;
-            //System.Text.Encoding.UTF8.GetString(encrypted) --output
 
-
-
-            //result.Replace("\r\n", " ");
-            //string[] lines = result.Split(' ');
-            //foreach (string line in lines)
-            //{
-            //    if (line != null)
-            //    {
-            //        //if (line.Contains(stringToSearch))
-            //        //{
-            //        //    line.Replace(stringToSearch, "newstring");
-            //        //    sbText.AppendLine(line);
-            //        //}
-            //        //else
-            //        //{
-            //        //    sbText.AppendLine(line);
-            //        //}
-            //    }
-            //}
-            
         }
 
         static byte[] Encrypt(string plainText, byte[] Key, byte[] IV)
@@ -201,44 +172,56 @@ namespace ENC
                 if (file.ContentLength > 0)
                 {
                     var fileName = Path.GetFileName(file.FileName);
-                    tbl_datakey objtbl_datakey = new tbl_datakey();
-                    objtbl_datakey.sender_id = senderId;
-                    objtbl_datakey.datafilename = Convert.ToString(fileName);
-                    objtbl_datakey.datafile = encrypted; // if you want to save encrypted data in database
-                    objtbl_datakey.datakey = datakey;
-                    db.saveFileDataToDB(objtbl_datakey); //rds sql
+                    tbl_datakey objtbl_datakey = new tbl_datakey
+                    {
+                        sender_id = senderId,
+                        datafilename = Convert.ToString(fileName),                        
+                        datakey = datakey
+                    };
                     if (cloudType == 1)
                     {
-                        d.UploadFileOnCloud(objtbl_datakey, file); //aws s3
+                        objtbl_datakey.datafile = Encoding.Default.GetBytes("A");
                     }
                     else if (cloudType == 2)
                     {
-                        b.UploadFileOnAzure(objtbl_datakey, file); //azure
+                        objtbl_datakey.datafile = Encoding.Default.GetBytes("Z");
+                    }
+                    else if (cloudType == 3)
+                    {
+                        objtbl_datakey.datafile = Encoding.Default.GetBytes("C");
+                    }
+                    else
+                    {
+                        objtbl_datakey.datafile = encrypted;// if you want to save encrypted data in database
+                    }
+                    db.SaveFileDataToDB(objtbl_datakey); //rds sql
+                    if (cloudType == 1)
+                    {
+                        d.UploadFileOnCloud(objtbl_datakey,encrypted, file); //aws s3
+                    }
+                    else if (cloudType == 2)
+                    {
+                        b.UploadFileOnAzure(objtbl_datakey,encrypted, file); //azure
                     }
                     else if (cloudType == 3)
                     {
                         CycladeManager c = new CycladeManager();
-                        c.UploadFileOnCyclade(objtbl_datakey, file);// cyclade
+                        c.UploadFileOnCyclade(objtbl_datakey,encrypted, file);// cyclade
                     }
                     return "success";
                 }
                 return "failure";
-               // return null;
             }
             catch(Exception ex)
             {
-                return null;
+                return "failure" + ex.Message.ToString();
             }
-            //System.IO.File.WriteAllText("D:\\UploadedFiles", sbText.ToString());// Write Final Data To File
-            //string _FileName = Path.GetFileName(file.FileName);
-            //string _path = Path.Combine(Server.MapPath("~/UploadedFiles"), _FileName);
-            //file.SaveAs(_path);
         }
 
 
 
         
-        public string getDecryptedData(byte[] encrypted,string datakey)
+        public string GetDecryptedData(byte[] encrypted,string datakey)
         {
             string decrypted = string.Empty;
             byte[] stringBytes = Encoding.ASCII.GetBytes(datakey);
@@ -249,7 +232,10 @@ namespace ENC
             {
                  decrypted = Decrypt(encrypted, resultDataKey, aes.IV);
             }
-
+            if(decrypted.Contains("failureLength of the data to decrypt is invalid."))
+            {
+                return "failure";
+            }
             string retrievedata =  CipherToPlain(decrypted, resultDataKey);
             return retrievedata;
         }
@@ -338,7 +324,7 @@ namespace ENC
                         pos = Convert.ToInt32(item.key) - extractedShift;
                         if(pos < 0)
                         {
-                            pos = pos + array.Count;
+                            pos += array.Count;
                         }
                         flag = true;
                     }
@@ -380,8 +366,8 @@ namespace ENC
                     }
                 }
             }
-            catch (Exception ex) { 
-            
+            catch (Exception ex) {
+                return "failure" + ex.Message.ToString();
             }
             return plaintext;
         }

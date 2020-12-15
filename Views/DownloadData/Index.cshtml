@@ -14,9 +14,12 @@
 <div style="display: flex;">
     @for (int i = 0; i < Model.listdownloadDataModel.Count; i++)
     {
-        <div class="card" style="width: 30%; height: 40%; padding: 1%;margin-left: 2%; background-color: #eeeeee;">
+    <div class="card" style="width: 30%; height: 40%; padding: 1%;margin-left: 2%; background-color: #eeeeee;">
 
-            @Html.Label("File name - ") @Html.DisplayFor(modelItem => modelItem.listdownloadDataModel[i].datafilename, new { htmlAttributes = new { @class = "form-control card-title card-header" } })
+        @Html.Label("File name - " + Model.listdownloadDataModel[i].stype)  
+        <span id="@i">
+            @Html.DisplayFor(modelItem => modelItem.listdownloadDataModel[i].datafilename, new { htmlAttributes = new { @class = "form-control card-title card-header" } })
+        </span>
             <br />
             @Html.Label("Receiver's Key")
             @Html.EditorFor(modelItem => modelItem.listdownloadDataModel[i].rkey, new { htmlAttributes = new { @class = "form-control" } })
@@ -37,10 +40,10 @@
             }
             <input type="button" value="Download" class="btn btn-primary" onclick="getFile(this,@Model.listdownloadDataModel[i].datakey_id,@Model.listdownloadDataModel[i].sr_id,@Model.listdownloadDataModel[i].rkey,@Model.listdownloadDataModel[i].sfname,@Model.listdownloadDataModel[i].slname,@Model.listdownloadDataModel[i].semail);" />
 
-        </div>
+    </div>
     }
 </div>
-<a id="download_link" download="exported_file.txt" href=””>Download as Text File</a>
+<a id="download_link" href=”” style="display:none;" class="btn btn-link">Download as Text File</a>
 
     }
 <head>
@@ -48,11 +51,12 @@
     <script type="text/javascript">
         function getFile(curelem, datakeyid, sr_id, rkey, sfname, slname, semail) {
             var url = "/api/Getfile"
-            var r = "", sf = "", sl = "", se = "";
-            for (i = 0; i < curelem.parentElement.children.length; i++) {
+            var r = "", sf = "", sl = "", se = "",fname="";
+            for (i = 0; i < curelem.parentElement.children.length; i++) {                
                 if (curelem.parentElement.children[i].nodeName == "INPUT") {
                     if (curelem.parentElement.children[i].name.includes("rkey")) {
                         r = curelem.parentElement.children[i].value;
+                        fname = curelem.parentElement.firstElementChild.nextElementSibling.textContent.trim();
                     }
                     if (curelem.parentElement.children[i].name.includes("sfname")) {
                         sf = curelem.parentElement.children[i].value;
@@ -71,11 +75,15 @@
                 url: url,
                 traditional: true,
                 contentType: "application/download",
-                data: {datakey_id: datakeyid, srid: sr_id, r_key: '67604', s_name: 'shraddha', s_lname: 'mhatre', s_email: 'shraddha@gmail.com' },
+                data: {datakey_id: datakeyid, srid: sr_id, r_key: r, s_name: sf, s_lname: sl, s_email: se },
                 success: function (data) {
-                    var data = new Blob([data], { type: 'text/plain' });
-                    var url = window.URL.createObjectURL(data);
-                    document.getElementById('download_link').href = url;
+                    if (data != "failure") {
+                        var data = new Blob([data], { type: 'text/plain' });
+                        var url = window.URL.createObjectURL(data);
+                        document.getElementById('download_link').style.display = "block";
+                        document.getElementById('download_link').download = fname; 
+                        document.getElementById('download_link').href = url;
+                    }
                 },
                 error: function (xhr, status, error) {
                     var errorText = xhr.status + "\r\n" + status + "\r\n" + error;

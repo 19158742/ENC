@@ -12,35 +12,59 @@ namespace ENC.Controllers
 {
     public class SRAllocationController : Controller
     {
-        private DBModel db = new DBModel();
-        DataOperations d = new DataOperations();
-        DBOperations dbOp = new DBOperations();
+        private readonly DBModel db = new DBModel();
+        readonly DataOperations d = new DataOperations();
+        readonly DBOperations dbOp = new DBOperations();
         // GET: SRAllocation
         public ActionResult Index()
-        {            
-            List<SRInfo> srinfo = dbOp.getSRInfo();
-            return View(srinfo.ToList());
+        {
+            try
+            {
+                List<SRInfo> srinfo = dbOp.GetSRInfo();
+                return View(srinfo.ToList());
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         // GET: SRAllocation/Details/5
         public ActionResult Details(int? id)
         {
-            if (id == null)
+            try
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
+                if (tbl_SR_allocation == null)
+                {
+                    return HttpNotFound();
+                }
+                return View(tbl_SR_allocation);
             }
-            tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
-            if (tbl_SR_allocation == null)
+            catch (Exception ex)
             {
-                return HttpNotFound();
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
             }
-            return View(tbl_SR_allocation);
         }
 
         // GET: SRAllocation/Create
         public ActionResult Create()
         {
-            return View();
+            try
+            {
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         // POST: SRAllocation/Create
@@ -50,28 +74,44 @@ namespace ENC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "sr_id,sender_id,receiver_id,tbldatakey_id,receiver_key")] tbl_SR_allocation tbl_SR_allocation)
         {
-            if (ModelState.IsValid)
+            try
             {
-                d.saveSRAllocation(tbl_SR_allocation);
-                return RedirectToAction("Index");
-            }
+                if (ModelState.IsValid)
+                {
+                    d.SaveSRAllocation(tbl_SR_allocation);
+                    return RedirectToAction("Index");
+                }
 
-            return View(tbl_SR_allocation);
+                return View(tbl_SR_allocation);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         // GET: SRAllocation/Edit/5
         public ActionResult Edit(int? id)
         {
-            if (id == null)
+            try
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
+                if (tbl_SR_allocation == null)
+                {
+                    return HttpNotFound();
+                }
+                return View(tbl_SR_allocation);
             }
-            tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
-            if (tbl_SR_allocation == null)
+            catch (Exception ex)
             {
-                return HttpNotFound();
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
             }
-            return View(tbl_SR_allocation);
         }
 
         // POST: SRAllocation/Edit/5
@@ -81,28 +121,44 @@ namespace ENC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "sr_id,sender_id,receiver_id,tbldatakey_id,receiver_key")] tbl_SR_allocation tbl_SR_allocation)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.Entry(tbl_SR_allocation).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    db.Entry(tbl_SR_allocation).State = EntityState.Modified;
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                return View(tbl_SR_allocation);
             }
-            return View(tbl_SR_allocation);
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         // GET: SRAllocation/Delete/5
         public ActionResult Delete(int? id)
         {
-            if (id == null)
+            try
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
+                if (tbl_SR_allocation == null)
+                {
+                    return HttpNotFound();
+                }
+                return View(tbl_SR_allocation);
             }
-            tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
-            if (tbl_SR_allocation == null)
+            catch (Exception ex)
             {
-                return HttpNotFound();
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
             }
-            return View(tbl_SR_allocation);
         }
 
         // POST: SRAllocation/Delete/5
@@ -110,10 +166,18 @@ namespace ENC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
-            db.tbl_SR_allocation.Remove(tbl_SR_allocation);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            try
+            {
+                tbl_SR_allocation tbl_SR_allocation = db.tbl_SR_allocation.Find(id);
+                db.tbl_SR_allocation.Remove(tbl_SR_allocation);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         protected override void Dispose(bool disposing)
@@ -128,24 +192,39 @@ namespace ENC.Controllers
         [HttpGet]
         public JsonResult FetchSenderIds() // its a GET, not a POST
         {
-            var senders = new Dictionary<string, string>();
-            senders = dbOp.GetAllSenders();
-            return Json(senders, JsonRequestBehavior.AllowGet);
+            try
+            {
+                var senders = new Dictionary<string, string>();
+                senders = dbOp.GetAllSenders();
+                return Json(senders, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return Json(ex, JsonRequestBehavior.AllowGet);
+            }
         }
 
         [HttpGet]
         public JsonResult FetchReceiverIds()
         {
-            var receivers = new Dictionary<string, string>();
-            receivers = dbOp.GetAllReceivers();
-            return Json(receivers, JsonRequestBehavior.AllowGet);
+            try
+            {
+                var receivers = new Dictionary<string, string>();
+                receivers = dbOp.GetAllReceivers();
+                return Json(receivers, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return Json(ex, JsonRequestBehavior.AllowGet);
+            }
         }
 
         [HttpGet]
         public JsonResult FetchDataFileIds(string sender_id)
         {
-            var datafileids = new Dictionary<string, string>();
-            datafileids = dbOp.GetAllDataFileIds(sender_id);
+            Dictionary<string, string> datafileids = dbOp.GetAllDataFileIds(sender_id);
             return Json(datafileids, JsonRequestBehavior.AllowGet);
         }
     }

@@ -2,13 +2,11 @@
     ViewBag.Title = "Home Page";
 }
 
-    <h1>Upload File</h1>
-    @using (Html.BeginForm("Index", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
-    {
-        <div>
-            @Html.TextBox("file", "", new { type = "file" }) <br />
-            <input type="submit" class="btn btn-primary btn-lg" value="Upload" />
-            @ViewBag.Message
-        </div>
-    }
+    <h1>Application Overview</h1>
+   <hr/>
+    <h5>Sender Information - Add sender's information and upload file</h5>
+    <hr /><h5>Receiver Information - Add receiver's information to share the data</h5>
+          <hr /><h5>Send Data - Select sender, data file and receiver to share the data</h5>
+                <hr /><h5>Download data - Select the file and provide the information to download</h5>
+
 

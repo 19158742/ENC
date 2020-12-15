@@ -17,28 +17,52 @@ namespace ENC.Controllers
         // GET: Receiver
         public ActionResult Index()
         {
-            return View(db.tbl_receiverinfo.ToList());
+            try
+            {
+                return View(db.tbl_receiverinfo.ToList());
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         // GET: Receiver/Details/5
         public ActionResult Details(int? id)
         {
-            if (id == null)
+            try
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                tbl_receiverinfo tbl_receiverinfo = db.tbl_receiverinfo.Find(id);
+                if (tbl_receiverinfo == null)
+                {
+                    return HttpNotFound();
+                }
+                return View(tbl_receiverinfo);
             }
-            tbl_receiverinfo tbl_receiverinfo = db.tbl_receiverinfo.Find(id);
-            if (tbl_receiverinfo == null)
+            catch (Exception ex)
             {
-                return HttpNotFound();
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
             }
-            return View(tbl_receiverinfo);
         }
 
         // GET: Receiver/Create
         public ActionResult Create()
         {
-            return View();
+            try
+            {
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         // POST: Receiver/Create
@@ -48,29 +72,46 @@ namespace ENC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "receiver_id,receiver_name,receiver_email")] tbl_receiverinfo tbl_receiverinfo)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.tbl_receiverinfo.Add(tbl_receiverinfo);
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
+                if (ModelState.IsValid)
+                {
+                    db.tbl_receiverinfo.Add(tbl_receiverinfo);
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
 
-            return View(tbl_receiverinfo);
+                return View(tbl_receiverinfo);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
+
 
         // GET: Receiver/Edit/5
         public ActionResult Edit(int? id)
         {
-            if (id == null)
+            try
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                tbl_receiverinfo tbl_receiverinfo = db.tbl_receiverinfo.Find(id);
+                if (tbl_receiverinfo == null)
+                {
+                    return HttpNotFound();
+                }
+                return View(tbl_receiverinfo);
             }
-            tbl_receiverinfo tbl_receiverinfo = db.tbl_receiverinfo.Find(id);
-            if (tbl_receiverinfo == null)
+            catch (Exception ex)
             {
-                return HttpNotFound();
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
             }
-            return View(tbl_receiverinfo);
         }
 
         // POST: Receiver/Edit/5
@@ -80,28 +121,44 @@ namespace ENC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "receiver_id,receiver_name,receiver_email")] tbl_receiverinfo tbl_receiverinfo)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.Entry(tbl_receiverinfo).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    db.Entry(tbl_receiverinfo).State = EntityState.Modified;
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                return View(tbl_receiverinfo);
             }
-            return View(tbl_receiverinfo);
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         // GET: Receiver/Delete/5
         public ActionResult Delete(int? id)
         {
-            if (id == null)
+            try
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                tbl_receiverinfo tbl_receiverinfo = db.tbl_receiverinfo.Find(id);
+                if (tbl_receiverinfo == null)
+                {
+                    return HttpNotFound();
+                }
+                return View(tbl_receiverinfo);
             }
-            tbl_receiverinfo tbl_receiverinfo = db.tbl_receiverinfo.Find(id);
-            if (tbl_receiverinfo == null)
+            catch (Exception ex)
             {
-                return HttpNotFound();
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
             }
-            return View(tbl_receiverinfo);
         }
 
         // POST: Receiver/Delete/5
@@ -109,10 +166,18 @@ namespace ENC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            tbl_receiverinfo tbl_receiverinfo = db.tbl_receiverinfo.Find(id);
-            db.tbl_receiverinfo.Remove(tbl_receiverinfo);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            try
+            {
+                tbl_receiverinfo tbl_receiverinfo = db.tbl_receiverinfo.Find(id);
+                db.tbl_receiverinfo.Remove(tbl_receiverinfo);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Er = ex.Message.ToString();
+                return View("ErrorMsg");
+            }
         }
 
         protected override void Dispose(bool disposing)
