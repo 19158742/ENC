@@ -17,6 +17,7 @@ using ENC.Models;
 
 namespace ENC.Controllers
 {
+    [Authorize]
     public class DownloadDataController : Controller
     {
         private readonly DBModel db = new DBModel();

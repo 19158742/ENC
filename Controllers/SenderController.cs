@@ -11,6 +11,7 @@ using System.Net.Http;
 
 namespace ENC.Controllers
 {
+    [Authorize]
     public class SenderController : Controller
     {
         private readonly DBModel db = new DBModel();

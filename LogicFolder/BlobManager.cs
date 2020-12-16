@@ -101,11 +101,7 @@ namespace ENC
                 // text = System.Text.Encoding.UTF8.GetString(memoryStream.ToArray());
                 byte[] bytes = dop.ReadToEnd(memoryStream);//convert stream to bytes
                 return bytes;
-            }
-            //return text;
-
-            //Stream mstream = new MemoryStream();
-           
+            }         
             
         }
     }

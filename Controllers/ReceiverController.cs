@@ -10,6 +10,7 @@ using ENC;
 
 namespace ENC.Controllers
 {
+    [Authorize]
     public class ReceiverController : Controller
     {
         private DBModel db = new DBModel();

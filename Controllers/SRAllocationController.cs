@@ -10,6 +10,7 @@ using ENC;
 
 namespace ENC.Controllers
 {
+    [Authorize]
     public class SRAllocationController : Controller
     {
         private readonly DBModel db = new DBModel();

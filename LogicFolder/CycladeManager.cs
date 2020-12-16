@@ -66,13 +66,10 @@ namespace ENC
                     {
                         string path = sftp.WorkingDirectory + "/" + keyName;
                     Stream mstream = new MemoryStream();
-                    //using (var memoryStream = new MemoryStream())
-                    //    {
-                            sftp.DownloadFile(path, mstream);
+                    sftp.DownloadFile(path, mstream);
                     mstream.Position = 0;
-                            byte[] bytes = dop.ReadToEnd(mstream);//convert stream to bytes
-                            return bytes;
-                    //    }
+                    byte[] bytes = dop.ReadToEnd(mstream);//convert stream to bytes
+                    return bytes;
                     }
                 }
             return null;

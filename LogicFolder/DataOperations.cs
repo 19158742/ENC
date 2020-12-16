@@ -81,7 +81,7 @@ namespace ENC
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(sEmail.Address, password)
             };
-            using (var mess = new MailMessage(sEmail.Address, "shraddha2977@gmail.com")
+            using (var mess = new MailMessage(sEmail.Address, receiverEmail)
             {
                 Subject = sub,
                 Body = body
